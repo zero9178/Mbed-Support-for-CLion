@@ -27,15 +27,9 @@ class MbedProjectCreators : DirectoryProjectGeneratorBase<MbedProjectOptions>(),
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getName(): String {
-        return "mbed-os"
-    }
+    override fun getName(): String = "mbed-os"
 
-    override fun createPeer(): ProjectGeneratorPeer<MbedProjectOptions> {
-        return super.createPeer()
-    }
+    override fun createPeer(): ProjectGeneratorPeer<MbedProjectOptions> = MbedProjectPeerImpl()
 
-    override fun getLogo(): Icon? {
-        return MbedIcons.MBED_ICON_16x16
-    }
+    override fun getLogo(): Icon? = MbedIcons.MBED_ICON_16x16
 }
