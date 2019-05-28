@@ -1,9 +1,12 @@
 package net.zero9178
 
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ide.util.projectWizard.ProjectSettingsStepBase
 import com.intellij.ide.util.projectWizard.SettingsStep
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ValidationInfo
+import java.io.File
+import java.io.IOException
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 
@@ -15,18 +18,37 @@ class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: Pro
         }
         setLoading(true)
         m_versionSelection.isEnabled = false
-        getMbedOSReleaseVersionsAsync().thenApply {
-            ApplicationManager.getApplication().invokeLater {
-                m_versionSelection.model = DefaultComboBoxModel(it.toTypedArray())
-                setLoading(false)
-                m_versionSelection.isEnabled = true
-                myProjectSettingsStepBase.checkValid()
+        getMbedOSReleaseVersionsAsync().handle { list,e ->
+            if (e != null) {
+                if(e !is IOException) {
+                    //TODO:LOG
+                    return@handle
+                }
+                if(PropertiesComponent.getInstance().getBoolean(USE_CACHE_KEY)) {
+                    m_versionSelection.model = DefaultComboBoxModel(File(CACHE_DIRECTORY).listFiles().map {
+                        it.name.removeSuffix(".zip")
+                    }.toTypedArray())
+                } else {
+                    setLoading(false)
+                    myProjectSettingsStepBase.checkValid()
+                }
+            } else {
+                ApplicationManager.getApplication().invokeLater {
+                    m_versionSelection.model = DefaultComboBoxModel(list.toTypedArray())
+                    setLoading(false)
+                    m_versionSelection.isEnabled = true
+                    myProjectSettingsStepBase.checkValid()
+                }
             }
         }
     }
 
     override fun validate(): ValidationInfo? = if (!m_versionSelection.isEnabled) {
-        ValidationInfo("No mbed-os version selected")
+        if(m_versionSelection.model.size == 0) {
+            ValidationInfo("Failed to retrieve github releases")
+        } else {
+            ValidationInfo("No mbed-os version selected")
+        }
     } else {
         null
     }

@@ -4,6 +4,8 @@
     <bytecodeTargetLevel>
       <module name="mbed-os-wizard.main" target="1.8" />
       <module name="mbed-os-wizard.test" target="1.8" />
+      <module name="mbed-os-wizard_main" target="1.8" />
+      <module name="mbed-os-wizard_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

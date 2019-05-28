@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/mbed-os-wizard.iml" filepath="$PROJECT_DIR$/.idea/mbed-os-wizard.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mbed-os-wizard.main.iml" filepath="$PROJECT_DIR$/.idea/modules/mbed-os-wizard.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mbed-os-wizard.test.iml" filepath="$PROJECT_DIR$/.idea/modules/mbed-os-wizard.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/mbed-os-wizard.iml" filepath="$PROJECT_DIR$/.idea/mbed-os-wizard.iml" group="mbed-os-wizard" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mbed-os-wizard_main.iml" filepath="$PROJECT_DIR$/.idea/modules/mbed-os-wizard_main.iml" group="mbed-os-wizard" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mbed-os-wizard_test.iml" filepath="$PROJECT_DIR$/.idea/modules/mbed-os-wizard_test.iml" group="mbed-os-wizard" />
     </modules>
   </component>
 </project>

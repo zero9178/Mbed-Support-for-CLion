@@ -18,5 +18,6 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <directoryProjectGenerator implementation="net.zero9178.MbedProjectCreators"/>
+        <applicationConfigurable groupId="tools" instance="net.zero9178.MbedSettingsImpl" displayName="mbed"/>
     </extensions>
 </idea-plugin>
