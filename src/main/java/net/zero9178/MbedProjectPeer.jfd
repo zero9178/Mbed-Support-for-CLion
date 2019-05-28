@@ -5,27 +5,9 @@ new FormModel {
 	root: new FormRoot {
 		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jgoodies.forms.layout.FormLayout ) {
 			"$columnSpecs": "21dlu, labelcompgap, 44dlu, labelcompgap, 168dlu, labelcompgap, 13dlu"
-			"$rowSpecs": "default, linegap, default"
+			"$rowSpecs": "default"
 		} ) {
 			name: "m_panel"
-			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
-				name: "m_pathLabel"
-				"text": "mbed-cli path:"
-				auxiliary() {
-					"JavaCodeGenerator.variableLocal": true
-				}
-			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridWidth": 3
-			} )
-			add( new FormComponent( "com.intellij.openapi.ui.TextFieldWithBrowseButton" ) {
-				name: "m_cliPath"
-				auxiliary() {
-					"JavaCodeGenerator.variableModifiers": 4
-				}
-			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 5
-				"gridWidth": 3
-			} )
 			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 				name: "m_versionLabel"
 				"text": "mbed-os version:"
@@ -34,7 +16,6 @@ new FormModel {
 				}
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 				"gridWidth": 3
-				"gridY": 3
 			} )
 			add( new FormComponent( "com.intellij.openapi.ui.ComboBox" ) {
 				name: "m_versionSelection"
@@ -44,14 +25,12 @@ new FormModel {
 				}
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 				"gridX": 5
-				"gridY": 3
 			} )
 			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 				name: "m_loading"
 				"toolTipText": "Querying versions..."
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 				"gridX": 6
-				"gridY": 3
 				"gridWidth": 2
 				"hAlign": sfield com.jgoodies.forms.layout.CellConstraints RIGHT
 			} )

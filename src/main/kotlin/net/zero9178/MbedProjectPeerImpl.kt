@@ -1,45 +1,17 @@
 package net.zero9178
 
+import com.intellij.ide.util.projectWizard.ProjectSettingsStepBase
 import com.intellij.ide.util.projectWizard.SettingsStep
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.fileChooser.FileChooserDescriptor
-import com.intellij.openapi.ui.TextBrowseFolderListener
 import com.intellij.openapi.ui.ValidationInfo
-import com.intellij.util.PathUtilRt
-import com.intellij.util.containers.computeIfAny
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Paths.get
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 
-class MbedProjectPeerImpl : MbedProjectPeer() {
-
-    private val mySettings = MbedProjectOptions.instance()
+class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: ProjectSettingsStepBase<String>) : MbedProjectPeer() {
 
     init {
-        m_cliPath.addBrowseFolderListener(
-            TextBrowseFolderListener(
-                FileChooserDescriptor(
-                    true,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false
-                )
-            )
-        )
-        val exeName = when (PathUtilRt.Platform.CURRENT) {
-            PathUtilRt.Platform.WINDOWS -> "mbed.exe"
-            else -> "mbed"
-        }
-        m_cliPath.text = mySettings.cliPath.ifEmpty {
-            System.getenv("PATH").split(File.pathSeparator).map {
-                get(it)
-            }.computeIfAny {
-                if (Files.exists(it.resolve(exeName))) "$it/$exeName" else null
-            } ?: ""
+        m_versionSelection.addItemListener {
+            myProjectSettingsStepBase.checkValid()
         }
         setLoading(true)
         m_versionSelection.isEnabled = false
@@ -48,29 +20,18 @@ class MbedProjectPeerImpl : MbedProjectPeer() {
                 m_versionSelection.model = DefaultComboBoxModel(it.toTypedArray())
                 setLoading(false)
                 m_versionSelection.isEnabled = true
+                myProjectSettingsStepBase.checkValid()
             }
         }
     }
 
-    override fun validate(): ValidationInfo? {
-        try {
-            if (ProcessBuilder().command(m_cliPath.text, "--version").start().waitFor() != 0) {
-                return ValidationInfo("\"${m_cliPath.text}\" could not be queried for the version")
-            }
-        } catch (e: Exception) {
-            return ValidationInfo("\"${m_cliPath.text}\" could not be queried for the version")
-        }
-        if (!m_versionSelection.isEnabled) {
-            return ValidationInfo("No mbed-os version selected")
-        }
-
-        mySettings.cliPath = m_cliPath.text
-        mySettings.version = m_versionSelection.selectedItem as? String ?: ""
-
-        return null
+    override fun validate(): ValidationInfo? = if (!m_versionSelection.isEnabled) {
+        ValidationInfo("No mbed-os version selected")
+    } else {
+        null
     }
 
-    override fun getSettings(): MbedProjectOptions = mySettings
+    override fun getSettings(): String = m_versionSelection.selectedItem as? String ?: ""
 
     /** Deprecated in 2017.3 But We must override it. */
     @Deprecated("", ReplaceWith("addSettingsListener"), level = DeprecationLevel.ERROR)

@@ -18,6 +18,5 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <directoryProjectGenerator implementation="net.zero9178.MbedProjectCreators"/>
-        <applicationService serviceImplementation="net.zero9178.MbedProjectOptions"/>
     </extensions>
 </idea-plugin>
