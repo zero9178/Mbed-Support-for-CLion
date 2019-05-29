@@ -3,9 +3,12 @@ package net.zero9178
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.ui.TextBrowseFolderListener
+import com.intellij.openapi.util.SystemInfo
+import com.intellij.util.io.exists
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.io.IOException
+import java.nio.file.Paths
 import javax.swing.JComponent
 
 val CACHE_DIRECTORY: String = System.getProperty("user.home") + File.separator + ".clionMbedPlugin"
@@ -28,12 +31,17 @@ class MbedSettingsImpl : MbedSettings() {
             )
         )
         m_cliPath.text = PropertiesComponent.getInstance().getValue(CLI_PATH_KEY) ?: ""
+        m_cliPath.text = m_cliPath.text.ifEmpty {
+            System.getenv("PATH").split(File.pathSeparatorChar).firstOrNull {
+                Paths.get(it).resolve(if (SystemInfo.isWindows) "mbed.exe" else "mbed").exists()
+            }?.plus(File.separatorChar + if (SystemInfo.isWindows) "mbed.exe" else "mbed") ?: ""
+        }
         m_enableChaching.isSelected = PropertiesComponent.getInstance().getBoolean(USE_CACHE_KEY)
         m_clearCache.addActionListener {
             try {
                 FileUtils.cleanDirectory(File(CACHE_DIRECTORY))
             } catch (e: IOException) {
-                //log later
+                //TODO: log later
             }
         }
     }

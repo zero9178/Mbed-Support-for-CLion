@@ -10,7 +10,8 @@ import java.io.IOException
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 
-class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: ProjectSettingsStepBase<String>) : MbedProjectPeer() {
+class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: ProjectSettingsStepBase<String>) :
+    MbedProjectPeer() {
 
     init {
         m_versionSelection.addItemListener {
@@ -18,13 +19,13 @@ class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: Pro
         }
         setLoading(true)
         m_versionSelection.isEnabled = false
-        getMbedOSReleaseVersionsAsync().handle { list,e ->
+        getMbedOSReleaseVersionsAsync().handle { list, e ->
             if (e != null) {
-                if(e !is IOException) {
+                if (e !is IOException) {
                     //TODO:LOG
                     return@handle
                 }
-                if(PropertiesComponent.getInstance().getBoolean(USE_CACHE_KEY)) {
+                if (PropertiesComponent.getInstance().getBoolean(USE_CACHE_KEY)) {
                     m_versionSelection.model = DefaultComboBoxModel(File(CACHE_DIRECTORY).listFiles().map {
                         it.name.removeSuffix(".zip")
                     }.toTypedArray())
@@ -43,11 +44,26 @@ class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: Pro
         }
     }
 
+    private var myCliValidated = false
+
     override fun validate(): ValidationInfo? = if (!m_versionSelection.isEnabled) {
-        if(m_versionSelection.model.size == 0) {
+        if (m_versionSelection.model.size == 0) {
             ValidationInfo("Failed to retrieve github releases")
         } else {
             ValidationInfo("No mbed-os version selected")
+        }
+    } else if (!myCliValidated){
+        val cliPath = PropertiesComponent.getInstance().getValue(CLI_PATH_KEY, "")
+        try {
+            val ret = ProcessBuilder().command(cliPath, "--version").start().waitFor()
+            if (ret == 0) {
+                myCliValidated = true
+                null
+            } else {
+                ValidationInfo("mbed-cli exited with error code $ret")
+            }
+        } catch (e: IOException) {
+            ValidationInfo("mbed-cli is not set")
         }
     } else {
         null
