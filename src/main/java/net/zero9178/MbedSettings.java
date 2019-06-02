@@ -21,6 +21,7 @@ public abstract class MbedSettings implements Configurable {
     protected JBCheckBox m_enableChaching;
     protected JButton m_clearCache;
     protected TextFieldWithBrowseButton m_cliPath;
+    // JFormDesigner - End of variables declaration  //GEN-END:variables
 
     public MbedSettings() {
         initComponents();
@@ -68,5 +69,4 @@ public abstract class MbedSettings implements Configurable {
         }
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
-    // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

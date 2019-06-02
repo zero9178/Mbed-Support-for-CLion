@@ -5,7 +5,7 @@ new FormModel {
 	root: new FormRoot {
 		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jgoodies.forms.layout.FormLayout ) {
 			"$columnSpecs": "21dlu, labelcompgap, 44dlu, labelcompgap, 168dlu, labelcompgap, 13dlu"
-			"$rowSpecs": "default"
+			"$rowSpecs": "default, linegap, default"
 		} ) {
 			name: "m_panel"
 			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
@@ -33,6 +33,15 @@ new FormModel {
 				"gridX": 6
 				"gridWidth": 2
 				"hAlign": sfield com.jgoodies.forms.layout.CellConstraints RIGHT
+			} )
+			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
+				name: "m_errorLabel"
+				auxiliary() {
+					"JavaCodeGenerator.variableModifiers": 4
+				}
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridY": 3
+				"gridWidth": 7
 			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 0 )

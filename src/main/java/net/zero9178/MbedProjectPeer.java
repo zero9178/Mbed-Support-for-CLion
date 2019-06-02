@@ -25,12 +25,24 @@ public abstract class MbedProjectPeer implements ProjectGeneratorPeer<String> {
         m_loading.setIcon(loading ? new AnimatedIcon.Default() : null);
     }
 
+    protected JBLabel m_errorLabel;
+
+    public JPanel getPanel() {
+        return m_panel;
+    }
+
+    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+    private JPanel m_panel;
+    protected ComboBox<String> m_versionSelection;
+    private JBLabel m_loading;
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         m_panel = new JPanel();
         JBLabel m_versionLabel = new JBLabel();
         m_versionSelection = new ComboBox<>();
         m_loading = new JBLabel();
+        m_errorLabel = new JBLabel();
         CellConstraints cc = new CellConstraints();
 
         //======== m_panel ========
@@ -45,7 +57,11 @@ public abstract class MbedProjectPeer implements ProjectGeneratorPeer<String> {
                     FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
                     new ColumnSpec(Sizes.dluX(13))
                 },
-                RowSpec.decodeSpecs("default")));
+                    new RowSpec[]{
+                            FormFactory.DEFAULT_ROWSPEC,
+                            FormFactory.LINE_GAP_ROWSPEC,
+                            FormFactory.DEFAULT_ROWSPEC
+                    }));
 
             //---- m_versionLabel ----
             m_versionLabel.setText("mbed-os version:");
@@ -55,17 +71,9 @@ public abstract class MbedProjectPeer implements ProjectGeneratorPeer<String> {
             //---- m_loading ----
             m_loading.setToolTipText("Querying versions...");
             m_panel.add(m_loading, cc.xywh(6, 1, 2, 1, CellConstraints.RIGHT, CellConstraints.DEFAULT));
+            m_panel.add(m_errorLabel, cc.xywh(1, 3, 7, 1));
         }
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
-
-    public JPanel getPanel() {
-        return m_panel;
-    }
-
-    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    private JPanel m_panel;
-    protected ComboBox<String> m_versionSelection;
-    private JBLabel m_loading;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

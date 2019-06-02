@@ -1,5 +1,6 @@
 package net.zero9178
 
+import com.intellij.icons.AllIcons
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ide.util.projectWizard.ProjectSettingsStepBase
 import com.intellij.ide.util.projectWizard.SettingsStep
@@ -20,26 +21,29 @@ class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: Pro
         setLoading(true)
         m_versionSelection.isEnabled = false
         getMbedOSReleaseVersionsAsync().handle { list, e ->
-            if (e != null) {
-                if (e !is IOException) {
-                    //TODO:LOG
-                    return@handle
-                }
-                if (PropertiesComponent.getInstance().getBoolean(USE_CACHE_KEY)) {
-                    m_versionSelection.model = DefaultComboBoxModel(File(CACHE_DIRECTORY).listFiles().map {
-                        it.name.removeSuffix(".zip")
-                    }.toTypedArray())
+            ApplicationManager.getApplication().invokeLater {
+                setLoading(false)
+                if (e != null) {
+                    if (e !is IOException) {
+                        //TODO:LOG
+                        return@invokeLater
+                    }
+                    if (PropertiesComponent.getInstance().getBoolean(USE_CACHE_KEY)) {
+                        val map = File(CACHE_DIRECTORY).listFiles().map {
+                            it.name.removeSuffix(".zip")
+                        }
+                        if (map.isNotEmpty()) {
+                            m_versionSelection.model = DefaultComboBoxModel(map.toTypedArray())
+                            m_errorLabel.icon = AllIcons.General.Warning
+                            m_errorLabel.text =
+                                "Failed to retrieve releases from online. Displaying releases in cache that are available offline"
+                        }
+                    }
                 } else {
-                    setLoading(false)
-                    myProjectSettingsStepBase.checkValid()
-                }
-            } else {
-                ApplicationManager.getApplication().invokeLater {
                     m_versionSelection.model = DefaultComboBoxModel(list.toTypedArray())
-                    setLoading(false)
                     m_versionSelection.isEnabled = true
-                    myProjectSettingsStepBase.checkValid()
                 }
+                myProjectSettingsStepBase.checkValid()
             }
         }
     }
@@ -52,7 +56,7 @@ class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: Pro
         } else {
             ValidationInfo("No mbed-os version selected")
         }
-    } else if (!myCliValidated){
+    } else if (!myCliValidated) {
         val cliPath = PropertiesComponent.getInstance().getValue(CLI_PATH_KEY, "")
         try {
             val ret = ProcessBuilder().command(cliPath, "--version").start().waitFor()

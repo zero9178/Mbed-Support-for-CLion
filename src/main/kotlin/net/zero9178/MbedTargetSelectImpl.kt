@@ -11,7 +11,7 @@ class MbedTargetSelectImpl(
     ideModalityType: IdeModalityType = IdeModalityType.PROJECT
 ) : MbedTargetSelect(project, canBeParent, ideModalityType) {
     init {
-        title = "Select target"
+        title = "Select initial target"
         m_targets.model = DefaultComboBoxModel(targets.toTypedArray())
     }
 
