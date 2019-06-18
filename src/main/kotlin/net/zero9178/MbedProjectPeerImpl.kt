@@ -19,14 +19,16 @@ class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: Pro
         }
         setLoading(true)
         m_versionSelection.isEnabled = false
-        getMbedOSReleaseVersionsAsync().thenAccept { list ->
+        getMbedOSReleaseVersionsAsync().thenAccept { (list, fromCache) ->
             ApplicationManager.getApplication().invokeLater {
                 setLoading(false)
                 m_versionSelection.model = DefaultComboBoxModel(list.toTypedArray())
                 m_versionSelection.isEnabled = true
-                m_errorLabel.icon = AllIcons.General.Warning
-                m_errorLabel.text =
-                    "Failed to retrieve releases from online. Displaying releases in cache that are available offline"
+                if (fromCache) {
+                    m_errorLabel.icon = AllIcons.General.Warning
+                    m_errorLabel.text =
+                        "Failed to retrieve releases from online. Displaying releases in cache that are available offline"
+                }
                 myProjectSettingsStepBase.checkValid()
             }
         }

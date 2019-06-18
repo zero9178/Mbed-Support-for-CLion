@@ -194,19 +194,21 @@ class MbedProjectCreators : DirectoryProjectGeneratorBase<String>(),
                     )
                     Files.write(
                         Paths.get(mbedPath).resolve("project.cmake"),
-                        listOf("add_subdirectory(.. \${CMAKE_CURRENT_BINARY_DIR}/${project.name})")
+                        listOf(
+                            "cmake_policy(SET CMP0076 NEW)",
+                            "set_target_properties(mbed-os PROPERTIES CXX_STANDARD 17)",
+                            "set_source_files_properties(\${OWN_SOURCES} PROPERTIES COMPILE_DEFINITIONS MBED_NO_GLOBAL_USING_DIRECTIVE)",
+                            "target_compile_options(mbed-os PUBLIC \$<\$<COMPILE_LANGUAGE:CXX>:-Wno-register>)",
+                            "add_subdirectory(.. \${CMAKE_CURRENT_BINARY_DIR}/${project.name})", ""
+                        )
                     )
                     Files.write(
                         Paths.get(project.basePath).resolve("CMakeLists.txt"),
                         listOf(
                             "",
-                            "cmake_policy(SET CMP0076 NEW)",
-                            "",
                             "set(OWN_SOURCES main.cpp)",
                             "target_sources(mbed-os PUBLIC \${OWN_SOURCES})",
-                            "set_target_properties(mbed-os PROPERTIES CXX_STANDARD 17)",
-                            "set_source_files_properties(\${OWN_SOURCES} PROPERTIES COMPILE_DEFINITIONS MBED_NO_GLOBAL_USING_DIRECTIVE)",
-                            "target_compile_options(mbed-os PUBLIC \$<\$<COMPILE_LANGUAGE:CXX>:-Wno-register>)"
+                            ""
                         )
                     )
                     indicator.fraction = 1.0

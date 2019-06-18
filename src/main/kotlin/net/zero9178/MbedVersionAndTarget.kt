@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture
 
 const val ARM_MBED_REPOSITORY = "ARMmbed/mbed-os"
 
-fun getMbedOSReleaseVersionsAsync() = CompletableFuture.supplyAsync {
+fun getMbedOSReleaseVersionsAsync(): CompletableFuture<Pair<List<String>, Boolean>> = CompletableFuture.supplyAsync {
     val tagsPath = Paths.get(CACHE_DIRECTORY).resolve(".gittags")
     var result = if (Files.exists(tagsPath)) {
         Files.readAllLines(tagsPath).map { it as String }
