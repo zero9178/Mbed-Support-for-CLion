@@ -6,7 +6,6 @@ import com.intellij.ide.util.projectWizard.ProjectSettingsStepBase
 import com.intellij.ide.util.projectWizard.SettingsStep
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ValidationInfo
-import java.io.File
 import java.io.IOException
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
@@ -20,29 +19,14 @@ class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: Pro
         }
         setLoading(true)
         m_versionSelection.isEnabled = false
-        getMbedOSReleaseVersionsAsync().handle { list, e ->
+        getMbedOSReleaseVersionsAsync().thenAccept { list ->
             ApplicationManager.getApplication().invokeLater {
                 setLoading(false)
-                if (e != null) {
-                    if (e !is IOException) {
-                        //TODO:LOG
-                        return@invokeLater
-                    }
-                    if (PropertiesComponent.getInstance().getBoolean(USE_CACHE_KEY)) {
-                        val map = File(CACHE_DIRECTORY).listFiles().map {
-                            it.name.removeSuffix(".zip")
-                        }
-                        if (map.isNotEmpty()) {
-                            m_versionSelection.model = DefaultComboBoxModel(map.toTypedArray())
-                            m_errorLabel.icon = AllIcons.General.Warning
-                            m_errorLabel.text =
-                                "Failed to retrieve releases from online. Displaying releases in cache that are available offline"
-                        }
-                    }
-                } else {
-                    m_versionSelection.model = DefaultComboBoxModel(list.toTypedArray())
-                    m_versionSelection.isEnabled = true
-                }
+                m_versionSelection.model = DefaultComboBoxModel(list.toTypedArray())
+                m_versionSelection.isEnabled = true
+                m_errorLabel.icon = AllIcons.General.Warning
+                m_errorLabel.text =
+                    "Failed to retrieve releases from online. Displaying releases in cache that are available offline"
                 myProjectSettingsStepBase.checkValid()
             }
         }

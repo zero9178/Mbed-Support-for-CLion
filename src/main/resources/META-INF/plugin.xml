@@ -14,10 +14,18 @@
     <depends>com.intellij.modules.lang</depends>
     -->
 
+    <actions>
+        <action class="net.zero9178.MbedChangeVersionAction" id="Mbed.ChangeVersion" text="Change Mbed-Os Version"
+                icon="icons/mbedOs.png">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+        </action>
+    </actions>
+
     <depends>com.intellij.modules.clion</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <directoryProjectGenerator implementation="net.zero9178.MbedProjectCreators"/>
         <applicationConfigurable groupId="tools" instance="net.zero9178.MbedSettingsImpl" displayName="mbed"/>
+        <iconProvider implementation="net.zero9178.MbedFolderIconProvider"/>
     </extensions>
 </idea-plugin>

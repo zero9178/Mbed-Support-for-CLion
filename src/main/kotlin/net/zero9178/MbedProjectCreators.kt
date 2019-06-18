@@ -130,6 +130,7 @@ class MbedProjectCreators : DirectoryProjectGeneratorBase<String>(),
             ProgressManager.getInstance()
                 .run(ModalCanceableTask(project, "Unzipping and generating cmake project", unzipper@{ indicator ->
                     val length = File(zipFile).length()
+                    val mbedPath = Paths.get(project.basePath).resolve("mbed-os").toString()
                     try {
                         ZipArchiveInputStream(FileInputStream(zipFile)).use {
                             var topDirectoryEncountered = false
@@ -138,7 +139,7 @@ class MbedProjectCreators : DirectoryProjectGeneratorBase<String>(),
                             while (zipEntry != null) {
                                 indicator.checkCanceled()
                                 val file = File(
-                                    project.basePath,
+                                    mbedPath,
                                     if (topDirectoryEncountered) zipEntry.name.removePrefix(topDirectoryName) else zipEntry.name
                                 )
                                 if (zipEntry.isDirectory) {
@@ -167,7 +168,7 @@ class MbedProjectCreators : DirectoryProjectGeneratorBase<String>(),
                         Files.delete(Paths.get(zipFile))
                     }
                     var target = ""
-                    val targets = queryCompatibleTargets(virtualFile.path)
+                    val targets = queryCompatibleTargets(Paths.get(virtualFile.path).resolve("mbed-os").toString())
                     ApplicationManager.getApplication().invokeAndWait {
                         val dialog = MbedTargetSelectImpl(targets, project)
                         if (dialog.showAndGet()) {
@@ -183,7 +184,7 @@ class MbedProjectCreators : DirectoryProjectGeneratorBase<String>(),
                         "cmake_gcc_arm",
                         "-m",
                         target
-                    ).directory(File(project.basePath)).start().waitFor()
+                    ).directory(File(mbedPath)).start().waitFor()
                     if (exitCode != 0) {
                         return@unzipper
                     }
@@ -192,22 +193,27 @@ class MbedProjectCreators : DirectoryProjectGeneratorBase<String>(),
                         listOf("#include <mbed.h>", "", "int main()", "{", "", "}", "")
                     )
                     Files.write(
-                        Paths.get(project.basePath).resolve("project.cmake"),
+                        Paths.get(mbedPath).resolve("project.cmake"),
+                        listOf("add_subdirectory(.. \${CMAKE_CURRENT_BINARY_DIR}/${project.name})")
+                    )
+                    Files.write(
+                        Paths.get(project.basePath).resolve("CMakeLists.txt"),
                         listOf(
                             "",
                             "cmake_policy(SET CMP0076 NEW)",
                             "",
                             "set(OWN_SOURCES main.cpp)",
-                            "target_sources(${project.name} PUBLIC \${OWN_SOURCES})",
-                            "set_target_properties(${project.name} PROPERTIES CXX_STANDARD 17)",
+                            "target_sources(mbed-os PUBLIC \${OWN_SOURCES})",
+                            "set_target_properties(mbed-os PROPERTIES CXX_STANDARD 17)",
                             "set_source_files_properties(\${OWN_SOURCES} PROPERTIES COMPILE_DEFINITIONS MBED_NO_GLOBAL_USING_DIRECTIVE)",
-                            "target_compile_options(${project.name} PUBLIC \$<\$<COMPILE_LANGUAGE:CXX>:-Wno-register>)"
+                            "target_compile_options(mbed-os PUBLIC \$<\$<COMPILE_LANGUAGE:CXX>:-Wno-register>)"
                         )
                     )
                     indicator.fraction = 1.0
                 })
                 {
-                    CMakeWorkspace.getInstance(project).selectProjectDir(VfsUtilCore.virtualToIoFile(virtualFile))
+                    CMakeWorkspace.getInstance(project)
+                        .selectProjectDir(VfsUtilCore.virtualToIoFile(virtualFile).toPath().resolve("mbed-os").toFile())
                 })
         }
         ProgressManager.getInstance().run(downloadTask)

@@ -3,8 +3,11 @@ package net.zero9178
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
+import com.intellij.ide.util.PropertiesComponent
 import org.kohsuke.github.GitHub
+import java.io.File
 import java.io.FileInputStream
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.concurrent.CompletableFuture
@@ -30,8 +33,20 @@ fun getMbedOSReleaseVersionsAsync() = CompletableFuture.supplyAsync {
         tagsPath.toFile().parentFile.mkdirs()
         Files.write(tagsPath, result)
     }
-    result
-}!!
+    result to false
+}!!.exceptionally { throwable ->
+    if (throwable !is IOException) {
+        if (PropertiesComponent.getInstance().getBoolean(USE_CACHE_KEY)) {
+            File(CACHE_DIRECTORY).listFiles().map {
+                it.name.removeSuffix(".zip")
+            } to true
+        } else {
+            emptyList<String>() to true
+        }
+    } else {
+        throw throwable
+    }
+}
 
 fun queryCompatibleTargets(projectPath: String): List<String> {
     val map = mutableSetOf<String>()
