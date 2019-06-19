@@ -15,14 +15,6 @@ class MbedChangeVersionAction : AnAction() {
     override fun actionPerformed(event: AnActionEvent) {
         val project = event.project ?: return
         val vf = LocalFileSystem.getInstance().findFileByIoFile(File(project.basePath)) ?: return
-        val folder = vf.findChild("mbed-os") ?: return
-        if (!folder.isDirectory) {
-            return
-        }
-        try {
-            folder.delete(this)
-        } catch (e: IOException) {
-        }
         val dialog = MbedVersionSelectImpl(project)
         getMbedOSReleaseVersionsAsync().thenAccept { (list, _) ->
             ApplicationManager.getApplication().invokeLater {
@@ -30,9 +22,16 @@ class MbedChangeVersionAction : AnAction() {
             }
         }
         if (dialog.showAndGet()) {
+            val folder = vf.findChild("mbed-os") ?: return
+            if (folder.isDirectory) {
+                try {
+                    folder.delete(this)
+                } catch (e: IOException) {
+                }
+            }
             changeMbedVersion(project, vf, dialog.selectedVersion) {
                 CMakeWorkspace.getInstance(project)
-                    .selectProjectDir(VfsUtilCore.virtualToIoFile(vf).toPath().resolve("mbed-os").toFile())
+                        .selectProjectDir(VfsUtilCore.virtualToIoFile(vf).toPath().resolve("mbed-os").toFile())
             }
         }
     }

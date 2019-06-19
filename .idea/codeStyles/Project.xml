@@ -1,14 +1,8 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
-    <JavaCodeStyleSettings>
-      <option name="FIELD_NAME_PREFIX" value="m_" />
-    </JavaCodeStyleSettings>
     <JetCodeStyleSettings>
       <option name="CODE_STYLE_DEFAULTS" value="KOTLIN_OFFICIAL" />
     </JetCodeStyleSettings>
-    <ScalaCodeStyleSettings>
-      <option name="MULTILINE_STRING_SUPPORT" value="-1" />
-    </ScalaCodeStyleSettings>
     <codeStyleSettings language="kotlin">
       <option name="CODE_STYLE_DEFAULTS" value="KOTLIN_OFFICIAL" />
     </codeStyleSettings>

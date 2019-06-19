@@ -2,3 +2,10 @@
 /.gradle/
 /build/
 /build/classes/java/main/
+
+.idea/modules.xml
+.idea/*.iml
+.idea/modules
+*.iml
+*.ipr
+.idea/libraries/*.xml
