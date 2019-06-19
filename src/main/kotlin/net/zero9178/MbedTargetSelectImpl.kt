@@ -15,8 +15,11 @@ class MbedTargetSelectImpl(
         m_targets.model = DefaultComboBoxModel(targets.toTypedArray())
     }
 
-    val selectedTarget: String
+    var selectedTarget: String
         get() = m_targets.selectedItem as String
+        set(value) {
+            m_targets.selectedItem = value
+        }
 
     override fun getPreferredFocusedComponent(): JComponent = m_targets
 }

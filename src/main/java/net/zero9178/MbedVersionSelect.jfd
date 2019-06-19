@@ -1,0 +1,44 @@
+JFDML JFormDesigner: "7.0.0.0.194" Java: "11.0.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jgoodies.forms.layout.FormLayout ) {
+			"$columnSpecs": "138dlu, labelcompgap, default"
+			"$rowSpecs": "default, linegap, default"
+		} ) {
+			name: "m_panel"
+			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
+				name: "m_label"
+				"text": "Version"
+				"horizontalAlignment": 0
+				auxiliary() {
+					"JavaCodeGenerator.variableLocal": true
+				}
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridX": 1
+				"gridY": 1
+			} )
+			add( new FormComponent( "com.intellij.openapi.ui.ComboBox" ) {
+				name: "m_version"
+				auxiliary() {
+					"JavaCodeGenerator.typeParameters": "String"
+					"JavaCodeGenerator.variableModifiers": 4
+				}
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridX": 1
+				"gridY": 3
+			} )
+			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
+				name: "m_loading"
+				"toolTipText": "Querying versions..."
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridX": 3
+				"gridY": 3
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 265, 50 )
+		} )
+	}
+}

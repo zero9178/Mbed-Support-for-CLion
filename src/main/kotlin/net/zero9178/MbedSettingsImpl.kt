@@ -14,6 +14,7 @@ import javax.swing.JComponent
 val CACHE_DIRECTORY: String = System.getProperty("user.home") + File.separator + ".clionMbedPlugin"
 const val CLI_PATH_KEY = "MBED_CLI_PATH"
 const val USE_CACHE_KEY = "MBED_USE_CACHE"
+const val LAST_TARGET_KEY = "MBED_LAST_TARGET"
 
 class MbedSettingsImpl : MbedSettings() {
 
