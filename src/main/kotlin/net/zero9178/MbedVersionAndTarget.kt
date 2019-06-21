@@ -8,9 +8,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProcessCanceledException
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
-import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
@@ -88,21 +86,6 @@ fun queryCompatibleTargets(projectPath: String): List<String> {
     return map.toList()
 }
 
-private class ModalCanceableTask(
-    project: Project,
-    title: String,
-    val runner: (ProgressIndicator) -> Unit,
-    val successRunner: () -> Unit = {}
-) : Task.Modal(project, title, true) {
-    override fun run(indicator: ProgressIndicator) {
-        runner(indicator)
-    }
-
-    override fun onSuccess() {
-        successRunner()
-    }
-}
-
 private fun getFileSize(url: URL): Long {
     var con: HttpURLConnection? = null
     return try {
@@ -117,7 +100,8 @@ private fun getFileSize(url: URL): Long {
 }
 
 fun changeMbedVersion(project: Project, virtualFile: VirtualFile, releaseTag: String, runAfter: () -> Unit = {}) {
-    val zipFile = "${virtualFile.path + File.separator}..${File.separator + releaseTag}.zip"
+    project.basePath ?: return
+    val zipFile = Paths.get(virtualFile.path).resolve("..").resolve("$releaseTag.zip").toString()
     val downloadTask = ModalCanceableTask(project, "Downloading mbed-os", { indicator ->
         val cachePath = Paths.get(CACHE_DIRECTORY + File.separator + "$releaseTag.zip")
         if (!PropertiesComponent.getInstance().getBoolean(USE_CACHE_KEY) || !Files.exists(cachePath)) {
@@ -250,7 +234,8 @@ fun changeMbedVersion(project: Project, virtualFile: VirtualFile, releaseTag: St
                             "cmake_policy(SET CMP0076 NEW)",
                             "set_target_properties(mbed-os PROPERTIES CXX_STANDARD 17)",
                             "target_compile_options(mbed-os PUBLIC \$<\$<COMPILE_LANGUAGE:CXX>:-Wno-register>)",
-                            "add_subdirectory(.. \${CMAKE_CURRENT_BINARY_DIR}/${project.name})", ""
+                            "add_subdirectory(.. \${CMAKE_CURRENT_BINARY_DIR}/${Paths.get(project.basePath).fileName})",
+                            ""
                         )
                     )
                     indicator.fraction = 1.0

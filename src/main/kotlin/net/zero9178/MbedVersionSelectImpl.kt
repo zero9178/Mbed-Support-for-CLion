@@ -30,10 +30,10 @@ class MbedVersionSelectImpl(
     override fun getPreferredFocusedComponent(): JComponent = m_version
 
     override fun doValidate(): ValidationInfo? {
-        if (m_version.selectedIndex == -1) {
-            return ValidationInfo("Version needs to be selected")
+        return if (m_version.selectedIndex == -1) {
+            ValidationInfo("Version needs to be selected")
         } else {
-            return null
+            null
         }
     }
 }

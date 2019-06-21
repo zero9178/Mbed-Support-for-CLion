@@ -18,6 +18,7 @@
         <action class="net.zero9178.MbedChangeVersionAction" id="Mbed.ChangeVersion" text="Change Mbed-Os Version"
                 icon="icons/mbedOs.png">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
     </actions>
 

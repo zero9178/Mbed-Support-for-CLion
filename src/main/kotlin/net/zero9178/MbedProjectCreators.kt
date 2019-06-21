@@ -20,7 +20,7 @@ import javax.swing.Icon
 class MbedProjectCreators : DirectoryProjectGeneratorBase<String>(),
     CustomStepProjectGenerator<String> {
 
-    lateinit var myProjectSettingsStepBase: ProjectSettingsStepBase<String>
+    private lateinit var myProjectSettingsStepBase: ProjectSettingsStepBase<String>
 
     override fun createStep(
         projectGenerator: DirectoryProjectGenerator<String>?,
