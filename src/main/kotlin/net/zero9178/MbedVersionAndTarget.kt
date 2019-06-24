@@ -130,7 +130,7 @@ fun changeMbedVersion(project: Project, virtualFile: VirtualFile, releaseTag: St
                     override fun read(dst: ByteBuffer?): Int {
                         val length = rbc.read(dst)
                         bytesWritten += length
-                        if (indicator.isIndeterminate) {
+                        if (!indicator.isIndeterminate) {
                             indicator.fraction = bytesWritten.toDouble() / size
                         }
                         indicator.checkCanceled()
@@ -226,6 +226,11 @@ fun changeMbedVersion(project: Project, virtualFile: VirtualFile, releaseTag: St
                         target
                     ).directory(File(mbedPath)).start().waitFor()
                     if (exitCode != 0) {
+                        val notification = MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
+                            "mbed cli failed to generate cmake project\n please verify that the cli works by running \"$cliPath export -i cmake_gcc_arm -m $target\" in the $mbedPath directory",
+                            NotificationType.ERROR
+                        )
+                        Notifications.Bus.notify(notification,project)
                         return@unzipper
                     }
                     Files.write(
