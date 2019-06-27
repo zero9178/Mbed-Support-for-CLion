@@ -5,6 +5,7 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ide.util.projectWizard.ProjectSettingsStepBase
 import com.intellij.ide.util.projectWizard.SettingsStep
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.ui.ValidationInfo
 import java.io.IOException
 import javax.swing.DefaultComboBoxModel
@@ -20,7 +21,7 @@ class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: Pro
         setLoading(true)
         m_versionSelection.isEnabled = false
         getMbedOSReleaseVersionsAsync().thenAccept { (list, fromCache) ->
-            ApplicationManager.getApplication().invokeLater {
+            ApplicationManager.getApplication().invokeLater({
                 setLoading(false)
                 m_versionSelection.model = DefaultComboBoxModel(list.toTypedArray())
                 m_versionSelection.isEnabled = true
@@ -30,7 +31,7 @@ class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: Pro
                         "Failed to retrieve releases from online. Displaying releases in cache that are available offline"
                 }
                 myProjectSettingsStepBase.checkValid()
-            }
+            }, ModalityState.stateForComponent(component))
         }
     }
 
@@ -68,7 +69,7 @@ class MbedProjectPeerImpl constructor(private val myProjectSettingsStepBase: Pro
 
     override fun buildUI(settingsStep: SettingsStep) = settingsStep.addExpertPanel(component)
 
-    override fun isBackgroundJobRunning(): Boolean = false
+    override fun isBackgroundJobRunning(): Boolean = true
 
     override fun getComponent(): JComponent = panel
 }

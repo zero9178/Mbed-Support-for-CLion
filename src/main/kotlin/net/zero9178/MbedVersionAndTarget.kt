@@ -237,6 +237,7 @@ fun changeMbedVersion(project: Project, virtualFile: VirtualFile, releaseTag: St
                         Paths.get(mbedPath).resolve("project.cmake"),
                         listOf(
                             "cmake_policy(SET CMP0076 NEW)",
+                            "cmake_policy(SET CMP0079 NEW)",
                             "set_target_properties(mbed-os PROPERTIES CXX_STANDARD 17)",
                             "target_compile_options(mbed-os PUBLIC \$<\$<COMPILE_LANGUAGE:CXX>:-Wno-register>)",
                             "add_subdirectory(.. \${CMAKE_CURRENT_BINARY_DIR}/${Paths.get(project.basePath).fileName})",
