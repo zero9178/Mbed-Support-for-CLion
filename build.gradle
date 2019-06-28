@@ -26,6 +26,7 @@ dependencies {
 intellij {
     version 'CL-2019.1.3'
     downloadSources true
+    plugins 'clion-embedded'
 }
 runIde {
     jvmArgs '-Xmx2G'

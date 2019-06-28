@@ -164,6 +164,7 @@ fun changeMbedVersion(project: Project, virtualFile: VirtualFile, releaseTag: St
             ModalCanceableTask(
                 project, "Unzipping and generating cmake project",
                 unzipper@{ indicator ->
+                    indicator.isIndeterminate = false
                     val length = File(zipFile).length()
                     val mbedPath = Paths.get(project.basePath).resolve("mbed-os").toString()
                     try {
