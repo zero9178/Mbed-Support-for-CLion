@@ -16,7 +16,7 @@
 
     <actions>
         <action class="net.zero9178.MbedChangeVersionAction" id="Mbed.ChangeVersion" text="Change Mbed-Os Version"
-                icon="icons/mbedOs.png">
+                icon="MbedIcons.MBED_ICON_16x16">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
@@ -26,7 +26,7 @@
     <depends>com.intellij.clion.embedded</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <directoryProjectGenerator implementation="net.zero9178.MbedProjectCreators"/>
+        <directoryProjectGenerator implementation="net.zero9178.MbedNewProjectCreators"/>
         <applicationConfigurable groupId="tools" instance="net.zero9178.MbedSettingsImpl" displayName="mbed"/>
         <iconProvider implementation="net.zero9178.MbedFolderIconProvider"/>
     </extensions>
