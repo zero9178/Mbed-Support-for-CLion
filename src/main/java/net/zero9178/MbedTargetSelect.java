@@ -25,7 +25,7 @@ public abstract class MbedTargetSelect extends DialogWrapper {
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     private JPanel m_panel;
-    protected ComboBox<String> m_targets;
+    protected ComboBox<String> myTargets;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 
     protected MbedTargetSelect(@Nullable Project project, boolean canBeParent, @NotNull IdeModalityType ideModalityType) {
@@ -44,7 +44,7 @@ public abstract class MbedTargetSelect extends DialogWrapper {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         m_panel = new JPanel();
         JBLabel m_label = new JBLabel();
-        m_targets = new ComboBox<>();
+        myTargets = new ComboBox<>();
         CellConstraints cc = new CellConstraints();
 
         //======== m_panel ========
@@ -60,7 +60,7 @@ public abstract class MbedTargetSelect extends DialogWrapper {
             //---- m_label ----
             m_label.setText("Target");
             m_panel.add(m_label, cc.xy(1, 1, CellConstraints.CENTER, CellConstraints.DEFAULT));
-            m_panel.add(m_targets, cc.xy(1, 3));
+            m_panel.add(myTargets, cc.xy(1, 3));
         }
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }

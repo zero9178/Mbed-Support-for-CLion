@@ -12,14 +12,14 @@ class MbedTargetSelectImpl(
 ) : MbedTargetSelect(project, canBeParent, ideModalityType) {
     init {
         title = "Select initial target"
-        m_targets.model = DefaultComboBoxModel(targets.toTypedArray())
+        myTargets.model = DefaultComboBoxModel(targets.toTypedArray())
     }
 
     var selectedTarget: String
-        get() = m_targets.selectedItem as String
+        get() = myTargets.selectedItem as String
         set(value) {
-            m_targets.selectedItem = value
+            myTargets.selectedItem = value
         }
 
-    override fun getPreferredFocusedComponent(): JComponent = m_targets
+    override fun getPreferredFocusedComponent(): JComponent = myTargets
 }

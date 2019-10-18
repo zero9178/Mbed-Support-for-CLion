@@ -1,5 +1,8 @@
 package net.zero9178
 
+import com.intellij.ide.util.PropertiesComponent
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
@@ -9,19 +12,29 @@ import icons.MbedIcons
 import java.io.File
 import javax.swing.Icon
 
-class MbedNewProjectCreators : DirectoryProjectGeneratorBase<String>() {
+class MbedNewProjectCreators : DirectoryProjectGeneratorBase<Any>() {
 
-    override fun generateProject(project: Project, virtualFile: VirtualFile, releaseTag: String, module: Module) {
+    override fun generateProject(project: Project, virtualFile: VirtualFile, settings: Any, module: Module) {
         ProgressManager.getInstance().run(ModalCanceableTask(project, "Creating new Mbed os project", {
-            val p = ProcessBuilder().directory(File(virtualFile.path)).command("mbed", "new", ".").start()
-            val reader = p.inputStream.bufferedReader()
-            var line = reader.readLine()
-            while (line != null) {
-                it.text = line
-                line = reader.readLine()
+            val cli = PropertiesComponent.getInstance().getValue(
+                CLI_PATH_KEY
+            )
+            if (cli == null) {
+                Notifications.Bus.notify(
+                    MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
+                        "Invalid mbed cli specified in settings",
+                        NotificationType.ERROR
+                    ), project
+                )
+                return@ModalCanceableTask
             }
+            val p = ProcessBuilder().directory(File(virtualFile.path)).command(
+                cli, "new", "."
+            ).start()
             p.waitFor()
-        }))
+        }) {
+            changeTargetDialog(project)
+        })
 //        changeMbedVersion(project, virtualFile) {
 //            virtualFile.writeChild(
 //                "main.cpp",
