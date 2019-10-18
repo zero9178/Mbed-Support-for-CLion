@@ -1,4 +1,4 @@
-package net.zero9178
+package net.zero9178.mbed
 
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.Task

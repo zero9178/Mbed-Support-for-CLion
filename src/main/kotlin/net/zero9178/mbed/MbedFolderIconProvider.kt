@@ -1,4 +1,4 @@
-package net.zero9178
+package net.zero9178.mbed
 
 import com.intellij.ide.IconProvider
 import com.intellij.psi.PsiDirectory

@@ -1,4 +1,4 @@
-package net.zero9178
+package net.zero9178.mbed.gui
 
 import com.intellij.openapi.project.Project
 import javax.swing.DefaultComboBoxModel

@@ -15,19 +15,29 @@
     -->
 
     <actions>
-        <action class="net.zero9178.MbedChangeVersionAction" id="Mbed.ChangeVersion" text="Change Mbed-Os Version"
+        <action class="net.zero9178.mbed.packages.MbedChangeVersionAction" id="Mbed.ChangeVersion"
+                text="Change Mbed-Os Version"
                 icon="MbedIcons.MBED_ICON_16x16">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
     </actions>
 
-    <depends>com.intellij.modules.clion</depends>
+    <application-components>
+        <component>
+            <implementation-class>net.zero9178.mbed.state.MbedState</implementation-class>
+        </component>
+    </application-components>
+
     <depends>com.intellij.clion.embedded</depends>
+    <depends>com.intellij.modules.vcs</depends>
+    <depends>Git4Idea</depends>
+    <depends>hg4idea</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <directoryProjectGenerator implementation="net.zero9178.MbedNewProjectCreators"/>
-        <applicationConfigurable groupId="tools" instance="net.zero9178.MbedSettingsImpl" displayName="mbed"/>
-        <iconProvider implementation="net.zero9178.MbedFolderIconProvider"/>
+        <checkoutProvider implementation="net.zero9178.mbed.project.MbedImportCheckout"/>
+        <directoryProjectGenerator implementation="net.zero9178.mbed.project.MbedNewProjectCreators"/>
+        <applicationConfigurable groupId="tools" instance="net.zero9178.mbed.gui.MbedSettingsImpl" displayName="mbed"/>
+        <iconProvider implementation="net.zero9178.mbed.MbedFolderIconProvider"/>
     </extensions>
 </idea-plugin>

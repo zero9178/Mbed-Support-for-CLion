@@ -1,12 +1,13 @@
-package net.zero9178
+package net.zero9178.mbed.packages
 
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
-import com.intellij.ide.util.PropertiesComponent
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import net.zero9178.mbed.ModalCanceableTask
+import net.zero9178.mbed.gui.MbedTargetSelectImpl
+import net.zero9178.mbed.state.MbedState
 import java.io.File
 import java.io.FileInputStream
 import java.nio.file.Paths
@@ -35,22 +36,17 @@ fun queryCompatibleTargets(mbedOsPath: String): List<String> {
 
 fun changeTargetDialog(project: Project) {
     val projectPath = project.basePath ?: return
-    val list = queryCompatibleTargets(Paths.get(projectPath).resolve("mbed-os").toString())
-    val dialog = MbedTargetSelectImpl(list, project)
-    if (dialog.showAndGet()) {
-        val cli = PropertiesComponent.getInstance().getValue(
-            CLI_PATH_KEY
-        )
-        if (cli == null) {
-            Notifications.Bus.notify(
-                MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
-                    "Invalid mbed cli specified in settings",
-                    NotificationType.ERROR
-                ), project
-            )
-            return
+    var list: List<String> = emptyList()
+    ProgressManager.getInstance().run(ModalCanceableTask(project, "Querying targets", {
+        list = queryCompatibleTargets(Paths.get(projectPath).resolve("mbed-os").toString())
+    }) {
+        val dialog = MbedTargetSelectImpl(list, project)
+        if (dialog.showAndGet()) {
+            val cli = MbedState.getInstance().cliPath
+            ProgressManager.getInstance().run(ModalCanceableTask(project, "Generating cmake", {
+                ProcessBuilder().directory(File(projectPath))
+                    .command(cli, "export", "-i", "cmake_gcc_arm", "-m", dialog.selectedTarget).start().waitFor()
+            }))
         }
-        ProcessBuilder().directory(File(projectPath))
-            .command(cli, "export", "-i", "cmake_gcc_arm", "-m", dialog.selectedTarget).start().waitFor()
-    }
+    })
 }

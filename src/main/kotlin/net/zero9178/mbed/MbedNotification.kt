@@ -1,4 +1,4 @@
-package net.zero9178
+package net.zero9178.mbed
 
 import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup

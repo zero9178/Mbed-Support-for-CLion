@@ -2,7 +2,7 @@
  * Created by JFormDesigner on Tue May 28 21:25:26 CEST 2019
  */
 
-package net.zero9178;
+package net.zero9178.mbed.gui;
 
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;

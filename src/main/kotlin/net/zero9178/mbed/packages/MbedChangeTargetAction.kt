@@ -1,4 +1,4 @@
-package net.zero9178
+package net.zero9178.mbed.packages
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
