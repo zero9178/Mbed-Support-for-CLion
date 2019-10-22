@@ -8,6 +8,7 @@ import com.intellij.openapi.ui.TextBrowseFolderListener
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.DocumentAdapter
 import com.intellij.util.io.exists
+import net.zero9178.mbed.state.MbedState
 import java.io.File
 import java.nio.file.Paths
 import javax.swing.event.DocumentEvent
@@ -67,6 +68,9 @@ class MbedImportCheckoutDialogImpl(
         }
         if (Paths.get(myDirectory.text).exists()) {
             return ValidationInfo("Path already exists", myDirectory)
+        }
+        if (MbedState.getInstance().cliPath.isBlank()) {
+            return ValidationInfo("mbed-cli is not valid")
         }
         return null
     }

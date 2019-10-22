@@ -15,8 +15,8 @@
     -->
 
     <actions>
-        <action class="net.zero9178.mbed.packages.MbedChangeVersionAction" id="Mbed.ChangeVersion"
-                text="Change Mbed-Os Version"
+        <action class="net.zero9178.mbed.packages.MbedChangeTargetAction" id="Mbed.ChangeTarget"
+                text="Change Target Board"
                 icon="MbedIcons.MBED_ICON_16x16">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
             <add-to-group group-id="ToolsMenu" anchor="last"/>
@@ -28,6 +28,12 @@
             <implementation-class>net.zero9178.mbed.state.MbedState</implementation-class>
         </component>
     </application-components>
+
+    <project-components>
+        <component>
+            <implementation-class>net.zero9178.mbed.packages.MbedJsonWatcher</implementation-class>
+        </component>
+    </project-components>
 
     <depends>com.intellij.clion.embedded</depends>
     <depends>com.intellij.modules.vcs</depends>

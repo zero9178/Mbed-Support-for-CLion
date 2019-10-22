@@ -1,6 +1,8 @@
 package net.zero9178.mbed.gui
 
 import com.intellij.openapi.project.Project
+import net.zero9178.mbed.packages.getLastTarget
+import net.zero9178.mbed.state.MbedState
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 
@@ -13,6 +15,7 @@ class MbedTargetSelectImpl(
     init {
         title = "Select initial target"
         myTargets.model = DefaultComboBoxModel(targets.toTypedArray())
+        myTargets.selectedItem = getLastTarget(project) ?: MbedState.getInstance().lastTarget
     }
 
     var selectedTarget: String
@@ -20,6 +23,14 @@ class MbedTargetSelectImpl(
         set(value) {
             myTargets.selectedItem = value
         }
+
+    override fun showAndGet(): Boolean {
+        val value = super.showAndGet()
+        if (value) {
+            MbedState.getInstance().lastTarget = selectedTarget
+        }
+        return value
+    }
 
     override fun getPreferredFocusedComponent(): JComponent = myTargets
 }

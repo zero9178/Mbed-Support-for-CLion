@@ -4,12 +4,12 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 
-class ModalCanceableTask(
+class ModalTask(
     project: Project,
     title: String,
     val runner: (ProgressIndicator) -> Unit,
     val successRunner: () -> Unit = {}
-) : Task.Modal(project, title, true) {
+) : Task.Modal(project, title, false) {
     override fun run(indicator: ProgressIndicator) {
         runner(indicator)
     }

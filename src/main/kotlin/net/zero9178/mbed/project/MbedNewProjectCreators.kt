@@ -8,7 +8,8 @@ import com.intellij.platform.DirectoryProjectGeneratorBase
 import com.intellij.testFramework.writeChild
 import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace
 import icons.MbedIcons
-import net.zero9178.mbed.ModalCanceableTask
+import net.zero9178.mbed.ModalTask
+import net.zero9178.mbed.packages.changeTarget
 import net.zero9178.mbed.packages.changeTargetDialog
 import net.zero9178.mbed.state.MbedState
 import org.apache.commons.exec.CommandLine
@@ -22,7 +23,7 @@ class MbedNewProjectCreators : DirectoryProjectGeneratorBase<Any>() {
 
     override fun generateProject(project: Project, virtualFile: VirtualFile, settings: Any, module: Module) {
         ProgressManager.getInstance().run(
-            ModalCanceableTask(
+            ModalTask(
                 project,
                 "Creating new Mbed os project",
                 {
@@ -37,7 +38,7 @@ class MbedNewProjectCreators : DirectoryProjectGeneratorBase<Any>() {
                     })
                     exec.execute(cl)
                 }) {
-                changeTargetDialog(project)
+                changeTargetDialog(project)?.let { changeTarget(it, project) }
                 virtualFile.writeChild(
                     "main.cpp",
                     """#include <mbed.h>
