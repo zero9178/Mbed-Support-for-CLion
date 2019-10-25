@@ -1,4 +1,4 @@
-package net.zero9178.mbed.packages
+package net.zero9178.mbed.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -7,6 +7,8 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressManager
 import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace
 import net.zero9178.mbed.ModalTask
+import net.zero9178.mbed.packages.changeTarget
+import net.zero9178.mbed.packages.changeTargetDialog
 import java.io.File
 
 class MbedChangeTargetAction : AnAction() {

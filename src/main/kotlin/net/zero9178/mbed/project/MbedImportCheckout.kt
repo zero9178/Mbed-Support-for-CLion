@@ -25,6 +25,7 @@ class MbedImportCheckout : CheckoutProvider {
     override fun doCheckout(project: Project, listener: CheckoutProvider.Listener?) {
         val dialog = MbedImportCheckoutDialogImpl(project)
         if (dialog.showAndGet()) {
+            MbedState.getInstance().lastDirectory = Paths.get(dialog.getDirectory()).parent.toString()
             ProgressManager.getInstance().run(
                 ModalTask(
                     project,

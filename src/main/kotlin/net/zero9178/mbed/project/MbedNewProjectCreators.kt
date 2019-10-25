@@ -4,8 +4,8 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.platform.DirectoryProjectGeneratorBase
 import com.intellij.testFramework.writeChild
+import com.jetbrains.cidr.cpp.cmake.projectWizard.generators.CLionProjectGenerator
 import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace
 import icons.MbedIcons
 import net.zero9178.mbed.ModalTask
@@ -19,7 +19,7 @@ import org.apache.commons.exec.PumpStreamHandler
 import java.io.File
 import javax.swing.Icon
 
-class MbedNewProjectCreators : DirectoryProjectGeneratorBase<Any>() {
+class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
 
     override fun generateProject(project: Project, virtualFile: VirtualFile, settings: Any, module: Module) {
         ProgressManager.getInstance().run(
@@ -66,5 +66,7 @@ set_source_files_properties(${"$"}{OWN_SOURCES} PROPERTIES COMPILE_DEFINITIONS M
     override fun getName(): String = "mbed-os"
 
     override fun getLogo(): Icon? = MbedIcons.MBED_ICON_16x16
+
+    override fun getGroupName() = "mbed"
 }
 

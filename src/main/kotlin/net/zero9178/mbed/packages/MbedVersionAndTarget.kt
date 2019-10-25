@@ -7,8 +7,10 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace
 import net.zero9178.mbed.MbedNotification
 import net.zero9178.mbed.ModalTask
+import net.zero9178.mbed.editor.MbedAppLibDirtyMarker
 import net.zero9178.mbed.gui.MbedTargetSelectImpl
 import net.zero9178.mbed.state.MbedState
 import java.io.File
@@ -58,18 +60,39 @@ fun changeTarget(target: String, project: Project) {
     val projectPath = project.basePath ?: return
     val cli = MbedState.getInstance().cliPath
     ProgressManager.getInstance().run(ModalTask(project, "Generating cmake", {
-        if (ProcessBuilder().directory(File(projectPath)).command(cli, "target", target).start().waitFor() != 0) {
+        val process = ProcessBuilder().directory(File(projectPath)).command(cli, "target", target).start()
+        if (process.waitFor() != 0) {
+            val output = process.inputStream.bufferedReader().readLines().joinToString("\n")
             Notifications.Bus.notify(
                 MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
-                    "Failed to set target",
+                    "mbed failed to set target with error code ${process.exitValue()} and output: $output",
                     NotificationType.ERROR
                 ), project
             )
             return@ModalTask
         }
-        ProcessBuilder().directory(File(projectPath))
-            .command(cli, "export", "-i", "cmake_gcc_arm").start().waitFor()
+        exportToCmake(project)
     }))
+}
+
+fun exportToCmake(project: Project) {
+    val projectPath = project.basePath ?: return
+    val cli = MbedState.getInstance().cliPath
+    val process = ProcessBuilder().directory(File(projectPath)).redirectErrorStream(true)
+        .command(cli, "export", "-i", "cmake_gcc_arm").start()
+    if (process.waitFor() == 0) {
+        project.putUserData(MbedAppLibDirtyMarker.NEEDS_RELOAD, false)
+        CMakeWorkspace.getInstance(project).scheduleReload(true)
+    } else {
+        val output = process.inputStream.bufferedReader().readLines().joinToString("\n")
+        Notifications.Bus.notify(
+            MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
+                "mbed export to cmake failed with error code ${process.exitValue()} and output: $output",
+                NotificationType.ERROR
+            ),
+            project
+        )
+    }
 }
 
 fun getLastTarget(project: Project): String? {

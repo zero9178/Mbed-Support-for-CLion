@@ -15,13 +15,14 @@
     -->
 
     <actions>
-        <action class="net.zero9178.mbed.packages.MbedChangeTargetAction" id="Mbed.ChangeTarget"
+        <action class="net.zero9178.mbed.actions.MbedChangeTargetAction" id="Mbed.ChangeTarget"
                 text="Change Target Board"
                 icon="MbedIcons.MBED_ICON_16x16">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
-        <action class="net.zero9178.mbed.project.MbedAppLibRefresh" id="Mbed.RefreshProject" text="Refresh Project"
+        <action class="net.zero9178.mbed.actions.MbedReloadChangesAction" id="Mbed.ReloadChanges"
+                text="Reload Mbed Project"
                 icon="MbedIcons.MBED_ICON_16x16">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
@@ -33,12 +34,23 @@
         </component>
     </application-components>
 
+    <project-components>
+        <component>
+            <implementation-class>net.zero9178.mbed.editor.MbedAppLibDirtyMarker</implementation-class>
+        </component>
+    </project-components>
+
     <depends>com.intellij.clion.embedded</depends>
     <depends>com.intellij.modules.vcs</depends>
     <depends>Git4Idea</depends>
     <depends>hg4idea</depends>
 
+    <extensions defaultExtensionNs="JavaScript">
+        <JsonSchema.ProviderFactory implementation="net.zero9178.mbed.editor.MbedAppLibSchemaProviderFactory"/>
+    </extensions>
+
     <extensions defaultExtensionNs="com.intellij">
+        <editorNotificationProvider implementation="net.zero9178.mbed.editor.MbedAppLibRefreshProvider"/>
         <checkoutProvider implementation="net.zero9178.mbed.project.MbedImportCheckout"/>
         <directoryProjectGenerator implementation="net.zero9178.mbed.project.MbedNewProjectCreators"/>
         <applicationConfigurable groupId="tools" instance="net.zero9178.mbed.gui.MbedSettingsImpl" displayName="mbed"/>

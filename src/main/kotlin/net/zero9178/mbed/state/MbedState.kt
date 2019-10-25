@@ -16,7 +16,7 @@ import java.nio.file.Paths
 )
 class MbedState : PersistentStateComponent<MbedState.State> {
 
-    data class State(var cliPath: String = "", var lastTarget: String = "")
+    data class State(var cliPath: String = "", var lastTarget: String = "", var lastDirectory: String = "")
 
     private var myState: State = State()
 
@@ -52,6 +52,12 @@ class MbedState : PersistentStateComponent<MbedState.State> {
         get() = myState.lastTarget
         set(value) {
             myState.lastTarget = value
+        }
+
+    var lastDirectory: String
+        get() = myState.lastDirectory
+        set(value) {
+            myState.lastDirectory = value
         }
 
     companion object {

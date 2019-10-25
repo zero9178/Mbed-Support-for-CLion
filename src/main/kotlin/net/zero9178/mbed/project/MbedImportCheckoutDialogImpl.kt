@@ -43,7 +43,8 @@ class MbedImportCheckoutDialogImpl(
                 )
             )
         )
-        myDirectory.text = ProjectUtil.getBaseDir() + File.separatorChar
+        myDirectory.text =
+            MbedState.getInstance().lastDirectory.ifBlank { ProjectUtil.getBaseDir() } + File.separatorChar
         myImportTarget.document.addDocumentListener(object : DocumentAdapter() {
             override fun textChanged(e: DocumentEvent) {
                 val parent = if (myDirectory.text.last() == File.separatorChar) {
