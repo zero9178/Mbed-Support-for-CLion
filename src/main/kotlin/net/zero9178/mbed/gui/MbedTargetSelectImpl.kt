@@ -15,7 +15,13 @@ class MbedTargetSelectImpl(
     init {
         title = "Select initial target"
         myTargets.model = DefaultComboBoxModel(targets.toTypedArray())
-        myTargets.selectedItem = getLastTarget(project) ?: MbedState.getInstance().lastTarget
+        val lastTarget = getLastTarget(project)
+        myTargets.selectedItem = lastTarget ?: MbedState.getInstance().lastTarget
+        if (lastTarget == null) {
+            myCurrentTarget.isVisible = false
+        } else {
+            myCurrentTarget.text += lastTarget
+        }
     }
 
     var selectedTarget: String

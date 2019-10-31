@@ -25,6 +25,6 @@ class MbedAppLibDirtyMarker(private val myProject: Project) {
                 }
                 super.documentChanged(event)
             }
-        })
+        }, myProject)
     }
 }
