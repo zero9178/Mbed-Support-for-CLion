@@ -16,6 +16,7 @@ import net.zero9178.mbed.state.MbedState
 import java.io.File
 import java.io.FileInputStream
 import java.nio.file.Paths
+import java.util.*
 
 fun queryCompatibleTargets(mbedOsPath: String): List<String> {
     val map = mutableSetOf<String>()
@@ -107,4 +108,44 @@ fun getLastTarget(project: Project): String? {
     }
     val line = start.inputStream.bufferedReader().readLines().lastOrNull()?.trim() ?: return null
     return line.substringAfterLast(' ')
+}
+
+sealed class QueryResult
+
+class QueryError(val message: String) : QueryResult()
+
+class Package(val name: String, val dependencies: MutableList<Package> = mutableListOf()) {
+    override fun toString() = name
+}
+
+class QuerySuccess(val packages: List<Package>) : QueryResult()
+
+fun queryPackages(project: Project): QueryResult {
+    val projectPath = project.basePath ?: return QueryError("Project has no base path")
+    val cli = MbedState.getInstance().cliPath
+    if (!File(cli).exists()) {
+        return QueryError("CLI Path invalid")
+    }
+    val start = ProcessBuilder().directory(File(projectPath)).command(cli, "ls", "-a").start()
+    if (start.waitFor() != 0) {
+        val lines = start.inputStream.bufferedReader().readLines()
+        return QueryError("CLI failed with error ${lines.joinToString("\n")}")
+    }
+    val lines = start.inputStream.bufferedReader().readLines().dropWhile { it.first() == '[' }
+    val topLevelPackage = mutableListOf<Package>()
+    val packages = TreeMap<Int, Package>()
+    for (line in lines) {
+        val offset = line.takeWhile { !it.isLetterOrDigit() }.length
+        if (offset == 0) {
+            topLevelPackage += Package(line.substring(offset).substringBefore('(').trim())
+            packages[0] = topLevelPackage.last()
+        } else {
+            val newPackage = Package(line.substring(offset).substringBefore('(').trim())
+            packages[offset] = newPackage
+            val parent = packages.entries.findLast { it.key < offset } ?: continue
+            parent.value.dependencies += newPackage
+        }
+    }
+
+    return QuerySuccess(topLevelPackage)
 }
