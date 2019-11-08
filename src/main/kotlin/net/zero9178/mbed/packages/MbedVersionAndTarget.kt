@@ -13,6 +13,7 @@ import net.zero9178.mbed.ModalTask
 import net.zero9178.mbed.editor.MbedAppLibDirtyMarker
 import net.zero9178.mbed.gui.MbedTargetSelectImpl
 import net.zero9178.mbed.state.MbedState
+import org.apache.commons.lang.StringUtils
 import java.io.File
 import java.io.FileInputStream
 import java.nio.file.Paths
@@ -110,42 +111,84 @@ fun getLastTarget(project: Project): String? {
     return line.substringAfterLast(' ')
 }
 
-sealed class QueryResult
+sealed class QueryPackageResult
 
-class QueryError(val message: String) : QueryResult()
+class QueryPackageError(val message: String) : QueryPackageResult()
 
-class Package(val name: String, val dependencies: MutableList<Package> = mutableListOf()) {
+class Package(val name: String, val repo: String?, val dependencies: MutableList<Package> = mutableListOf()) {
     override fun toString() = name
 }
 
-class QuerySuccess(val packages: List<Package>) : QueryResult()
+class QueryPackageSuccess(val topPackage: Package) : QueryPackageResult()
 
-fun queryPackages(project: Project): QueryResult {
-    val projectPath = project.basePath ?: return QueryError("Project has no base path")
+fun queryPackages(project: Project): QueryPackageResult {
+    val projectPath = project.basePath ?: return QueryPackageError("Project has no base path")
     val cli = MbedState.getInstance().cliPath
     if (!File(cli).exists()) {
-        return QueryError("CLI Path invalid")
+        return QueryPackageError("CLI Path invalid")
     }
     val start = ProcessBuilder().directory(File(projectPath)).command(cli, "ls", "-a").start()
     if (start.waitFor() != 0) {
         val lines = start.inputStream.bufferedReader().readLines()
-        return QueryError("CLI failed with error ${lines.joinToString("\n")}")
+        return QueryPackageError("CLI failed with error ${lines.joinToString("\n")}")
     }
     val lines = start.inputStream.bufferedReader().readLines().dropWhile { it.first() == '[' }
     val topLevelPackage = mutableListOf<Package>()
     val packages = TreeMap<Int, Package>()
     for (line in lines) {
         val offset = line.takeWhile { !it.isLetterOrDigit() }.length
+        val substring = line.substring(offset)
         if (offset == 0) {
-            topLevelPackage += Package(line.substring(offset).substringBefore('(').trim())
+            topLevelPackage += Package(
+                substring.substringBefore('(').trim(),
+                StringUtils.substringBetween(substring, "(", ")")
+            )
             packages[0] = topLevelPackage.last()
         } else {
-            val newPackage = Package(line.substring(offset).substringBefore('(').trim())
+            val newPackage =
+                Package(substring.substringBefore('(').trim(), StringUtils.substringBetween(substring, "(", ")"))
             packages[offset] = newPackage
             val parent = packages.entries.findLast { it.key < offset } ?: continue
             parent.value.dependencies += newPackage
         }
     }
 
-    return QuerySuccess(topLevelPackage)
+    return QueryPackageSuccess(topLevelPackage[0])
+}
+
+fun queryReleases(project: Project): Map<String, Pair<String?, List<String>>> {
+    val projectPath = project.basePath ?: return emptyMap()
+    val cli = MbedState.getInstance().cliPath
+    if (!File(cli).exists()) {
+        return emptyMap()
+    }
+    val start = ProcessBuilder().directory(File(projectPath)).command(cli, "releases", "-r").start()
+    if (start.waitFor() != 0) {
+        return emptyMap()
+    }
+    val lines = start.inputStream.bufferedReader().readLines().dropWhile { it.first() == '[' }
+
+    var current: Pair<String?, MutableList<String>>? = null
+    var currentName: String? = null
+    val map = mutableMapOf<String, Pair<String?, List<String>>>()
+    for (line in lines) {
+        val index = line.indexOfFirst { it.isLetterOrDigit() }
+        if (index == 0 || (index > 1 && (line[index - 2] == '-'))) {
+            current = null to mutableListOf()
+            val trim = line.substring(index).substringBefore('(').trim()
+            map[trim] = current
+            currentName = trim
+        } else if (line.substring(0, index).contains('*')) {
+            val tag = line.substring(index)
+            if (tag.endsWith("<- current") && currentName != null) {
+                val fixed = tag.removeSuffix("<- current").trim()
+                current = fixed to (current?.second?.let { it + fixed }?.toMutableList() ?: mutableListOf())
+                map[currentName] = current
+            } else {
+                current?.second?.add(tag)
+            }
+        }
+    }
+
+    return map
 }

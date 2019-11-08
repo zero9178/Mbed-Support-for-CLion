@@ -38,10 +38,6 @@
         <component>
             <implementation-class>net.zero9178.mbed.editor.MbedAppLibDirtyMarker</implementation-class>
         </component>
-        <component>
-            <interface-class>net.zero9178.mbed.gui.MbedPackagesView</interface-class>
-            <implementation-class>net.zero9178.mbed.gui.MbedPackagesViewImpl</implementation-class>
-        </component>
     </project-components>
 
     <depends>com.intellij.clion.embedded</depends>
@@ -54,11 +50,14 @@
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceInterface="net.zero9178.mbed.gui.MbedPackagesView"
+                        serviceImplementation="net.zero9178.mbed.gui.MbedPackagesViewImpl"/>
         <editorNotificationProvider implementation="net.zero9178.mbed.editor.MbedAppLibRefreshProvider"/>
         <checkoutProvider implementation="net.zero9178.mbed.project.MbedImportCheckout"/>
         <directoryProjectGenerator implementation="net.zero9178.mbed.project.MbedNewProjectCreators"/>
         <applicationConfigurable groupId="tools" instance="net.zero9178.mbed.gui.MbedSettingsImpl" displayName="mbed"/>
         <iconProvider implementation="net.zero9178.mbed.MbedFolderIconProvider"/>
-        <toolWindow anchor="bottom" factoryClass="net.zero9178.mbed.gui.MbedPackagesViewFactory" id="mbed packages"/>
+        <toolWindow anchor="bottom" factoryClass="net.zero9178.mbed.gui.MbedPackagesViewFactory" id="mbed packages"
+                    icon="MbedIcons.MBED_ICON_13x13" conditionClass="net.zero9178.mbed.gui.MbedPackagesViewFactory"/>
     </extensions>
 </idea-plugin>
