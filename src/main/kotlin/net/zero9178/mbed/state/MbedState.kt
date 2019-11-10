@@ -33,7 +33,7 @@ class MbedState : PersistentStateComponent<MbedState.State> {
 
     private fun ensurePopulated() {
         myState.cliPath = myState.cliPath.ifBlank {
-            val mbedCli = "mbed" + if (Platform.current() == Platform.WINDOWS) "exe" else ""
+            val mbedCli = "mbed" + if (Platform.current() == Platform.WINDOWS) ".exe" else ""
             System.getenv("PATH").split(File.pathSeparatorChar).firstOrNull {
                 Paths.get(it).resolve(mbedCli).exists()
             }?.let {

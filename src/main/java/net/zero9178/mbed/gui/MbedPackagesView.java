@@ -3,15 +3,14 @@ package net.zero9178.mbed.gui;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.IdeBorderFactory;
-import com.intellij.ui.JBColor;
-import com.intellij.ui.JBSplitter;
-import com.intellij.ui.SideBorder;
+import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.*;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.components.BorderLayoutPanel;
-import net.zero9178.mbed.packages.Package;
+import net.zero9178.mbed.packages.MbedPackage;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -28,9 +27,21 @@ public abstract class MbedPackagesView {
     @NotNull
     protected TreeView myTreeView = new TreeView();
 
-    protected static class PackageView {
-        public JPanel panel;
-        private JLabel packageName;
+    JPanel getPanel() {
+        if (myPanel == null) {
+
+            ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLWINDOW_CONTENT
+                    , new DefaultActionGroup(getActions()), false);
+            UIUtil.addBorder(actionToolbar.getComponent(), IdeBorderFactory.createBorder(JBColor.border(), SideBorder.RIGHT));
+            UIUtil.addBorder(myTreeView.panel, IdeBorderFactory.createBorder(JBColor.border(), SideBorder.RIGHT));
+            UIUtil.addBorder(myPackageView.panel, IdeBorderFactory.createBorder(JBColor.border(), SideBorder.LEFT));
+
+            JBSplitter splitter = new JBSplitter();
+            splitter.setFirstComponent(myTreeView.panel);
+            splitter.setSecondComponent(myPackageView.panel);
+            myPanel = JBUI.Panels.simplePanel(splitter).addToLeft(actionToolbar.getComponent());
+        }
+        return myPanel;
     }
 
     @NotNull
@@ -41,24 +52,18 @@ public abstract class MbedPackagesView {
         return ServiceManager.getService(project, MbedPackagesView.class);
     }
 
-    JPanel getPanel() {
-        if (myPanel == null) {
+    public abstract List<MbedPackage> getPackages();
 
-            ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLWINDOW_CONTENT
-                    , new DefaultActionGroup(getActions()), false);
-            UIUtil.addBorder(actionToolbar.getComponent(), IdeBorderFactory.createBorder(JBColor.border(), SideBorder.RIGHT));
-            UIUtil.addBorder(myTreeView.panel, IdeBorderFactory.createBorder(JBColor.border(), SideBorder.ALL));
-            UIUtil.addBorder(myPackageView.panel, IdeBorderFactory.createBorder(JBColor.border(), SideBorder.ALL));
-
-            JBSplitter splitter = new JBSplitter();
-            splitter.setFirstComponent(myTreeView.panel);
-            splitter.setSecondComponent(myPackageView.panel);
-            myPanel = JBUI.Panels.simplePanel(splitter).addToLeft(actionToolbar.getComponent());
-        }
-        return myPanel;
+    protected static class PackageView {
+        public JPanel panel;
+        public JBLabel packageName;
+        public JSeparator separator;
+        public JBLabel currentRelease;
+        public ComboBox<String> versionsAvailable;
+        public JButton confirmSwitch;
+        public JBLabel repoLabel;
+        public HyperlinkLabel repository;
     }
-
-    public abstract List<Package> getPackages();
 
     protected abstract List<? extends AnAction> getActions();
 }
