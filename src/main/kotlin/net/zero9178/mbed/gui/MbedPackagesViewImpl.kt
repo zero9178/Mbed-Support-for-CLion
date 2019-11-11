@@ -4,8 +4,12 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import net.zero9178.mbed.ModalTask
+import net.zero9178.mbed.actions.MbedReloadChangesAction
 import net.zero9178.mbed.packages.*
+import java.nio.file.Paths
 import javax.swing.DefaultComboBoxModel
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
@@ -47,6 +51,26 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
                 //Deselection
                 myPackageView.panel.isVisible = false
             }
+        }
+        myPackageView.confirmSwitch.addActionListener {
+            val array = myTreeView.tree.selectionPath?.path?.run {
+                slice(1..lastIndex)
+            } ?: return@addActionListener
+            val basePath = myProject.basePath ?: return@addActionListener
+            var path = Paths.get(basePath).parent
+            for (iter in array) {
+                path = path.resolve(iter.toString())
+            }
+            val item = myPackageView.versionsAvailable.selectedItem ?: return@addActionListener
+            var result = false
+            ProgressManager.getInstance().run(ModalTask(myProject, "Updating project", {
+                result = updatePackage(path.toString(), item.toString(), myProject)
+            }) {
+                if (result) {
+                    refreshTree()
+                    MbedReloadChangesAction.update(myProject)
+                }
+            })
         }
     }
 

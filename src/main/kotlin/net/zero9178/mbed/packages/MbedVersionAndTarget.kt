@@ -13,7 +13,11 @@ import net.zero9178.mbed.ModalTask
 import net.zero9178.mbed.editor.MbedAppLibDirtyMarker
 import net.zero9178.mbed.gui.MbedTargetSelectImpl
 import net.zero9178.mbed.state.MbedState
+import org.apache.commons.exec.CommandLine
+import org.apache.commons.exec.DefaultExecutor
+import org.apache.commons.exec.PumpStreamHandler
 import org.apache.commons.lang.StringUtils
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.nio.file.Paths
@@ -201,5 +205,30 @@ fun queryReleases(project: Project): CompletableFuture<Map<String, Pair<String?,
         }
 
         map
+    }
+}
+
+fun updatePackage(path: String, version: String, project: Project): Boolean {
+    val cli = MbedState.getInstance().cliPath
+    if (!File(cli).exists()) {
+        return false
+    }
+    val cl = CommandLine.parse("$cli update $version")
+    val exec = DefaultExecutor()
+    exec.workingDirectory = File(path)
+    val output = ByteArrayOutputStream()
+    exec.streamHandler = PumpStreamHandler(output)
+    val exitCode = exec.execute(cl)
+    return if (exitCode != 0) {
+        Notifications.Bus.notify(
+            MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
+                "mbed update failed with error code $exitCode and output: $output",
+                NotificationType.ERROR
+            ),
+            project
+        )
+        false
+    } else {
+        true
     }
 }
