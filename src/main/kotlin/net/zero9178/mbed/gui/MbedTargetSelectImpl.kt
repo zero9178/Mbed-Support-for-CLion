@@ -6,6 +6,14 @@ import net.zero9178.mbed.state.MbedState
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 
+/**
+ * Dialog for selecting a target
+ *
+ * @param targets List of targets for the user to choose from
+ * @param project Project for window modality
+ * @param canBeParent If dialog can have sub windows
+ * @param ideModalityType modality type
+ */
 class MbedTargetSelectImpl(
     targets: List<String>,
     project: Project,
@@ -24,6 +32,9 @@ class MbedTargetSelectImpl(
         }
     }
 
+    /**
+     * Name of target that was selected from the constructor supplied list
+     */
     var selectedTarget: String
         get() = myTargets.selectedItem as String
         set(value) {

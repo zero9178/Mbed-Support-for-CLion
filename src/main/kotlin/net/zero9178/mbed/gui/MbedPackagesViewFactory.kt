@@ -9,6 +9,10 @@ import com.intellij.ui.content.ContentFactory
 import com.intellij.util.io.exists
 import java.nio.file.Paths
 
+/**
+ * Factory for tool window on the bottom of the IDE for package management. Only shows up project contains
+ * an mbed_app.json file in the root directory
+ */
 class MbedPackagesViewFactory : ToolWindowFactory, DumbAware, Condition<Project> {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val packageView = MbedPackagesView.getInstance(project)

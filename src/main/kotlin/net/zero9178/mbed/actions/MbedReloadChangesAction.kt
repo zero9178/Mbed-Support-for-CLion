@@ -9,6 +9,10 @@ import com.intellij.ui.EditorNotifications
 import net.zero9178.mbed.ModalTask
 import net.zero9178.mbed.packages.exportToCmake
 
+/**
+ * Regenerates the cmake files and mbed config headers from the mbed json files. Found in Tools or by using the ribbon
+ * after changing a mbed json
+ */
 class MbedReloadChangesAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return

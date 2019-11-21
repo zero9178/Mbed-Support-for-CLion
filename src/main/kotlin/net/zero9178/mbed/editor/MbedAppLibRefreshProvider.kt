@@ -8,6 +8,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotifications
 
+/**
+ * Provides the ribbon up top in the editor when editing and changing mbed_app.json or mbed_lib.json
+ */
 class MbedAppLibRefreshProvider : EditorNotifications.Provider<EditorNotificationPanel>(), DumbAware {
 
     companion object {

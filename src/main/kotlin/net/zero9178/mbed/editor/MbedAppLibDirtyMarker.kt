@@ -8,6 +8,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.ui.EditorNotifications
 
+/**
+ * Per project component which records if any files called mbed_lib.json or mbed_app.json have changed since last
+ * cmake regeneration. Sets NEEDS_RELOAD on the project when needed
+ */
 class MbedAppLibDirtyMarker(private val myProject: Project) {
 
     companion object {

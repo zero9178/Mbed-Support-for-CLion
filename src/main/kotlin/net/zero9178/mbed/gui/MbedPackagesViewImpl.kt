@@ -15,6 +15,9 @@ import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 import javax.swing.tree.TreeSelectionModel.SINGLE_TREE_SELECTION
 
+/**
+ * GUI for package management
+ */
 class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() {
     private val myFlatPackageList = mutableListOf<MbedPackage>()
     private var myReleaseMap = mapOf<String, Pair<String?, List<String>>>()
@@ -52,7 +55,7 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
                 myPackageView.panel.isVisible = false
             }
         }
-        myPackageView.confirmSwitch.addActionListener {
+        myPackageView.checkoutButton.addActionListener {
             val array = myTreeView.tree.selectionPath?.path?.run {
                 slice(1..lastIndex)
             } ?: return@addActionListener
@@ -74,6 +77,9 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
         }
     }
 
+    /**
+     * Refreshes dependencies of application async
+     */
     private fun refreshTree() {
         queryPackages(myProject).thenAccept {
             ApplicationManager.getApplication().invokeLater {
@@ -105,7 +111,7 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
         }
     }
 
-    override fun getActions(): MutableList<out AnAction> {
+    override fun getSideActions(): MutableList<out AnAction> {
         return mutableListOf(object : AnAction(AllIcons.Actions.Refresh) {
             override fun actionPerformed(e: AnActionEvent) {
                 refreshTree()

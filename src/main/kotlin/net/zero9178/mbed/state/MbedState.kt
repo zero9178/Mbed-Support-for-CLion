@@ -10,6 +10,10 @@ import com.intellij.util.io.exists
 import java.io.File
 import java.nio.file.Paths
 
+/**
+ * Application wide state that holds the CLI, the user's last used target as well as their last used directory
+ * when checking out with mbed import from VCS
+ */
 @State(
     name = "net.zero9178.state.MbedState",
     storages = [Storage("zero978.mbedState.xml", roamingType = RoamingType.DISABLED)]

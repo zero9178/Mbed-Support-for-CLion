@@ -16,6 +16,9 @@ import javax.swing.text.AbstractDocument
 import javax.swing.text.AttributeSet
 import javax.swing.text.DocumentFilter
 
+/**
+ * GUI shown when using the mbed import functionality from the VCS menu
+ */
 class MbedImportCheckoutDialogImpl(
     project: Project,
     canBeParent: Boolean = false,
@@ -27,6 +30,7 @@ class MbedImportCheckoutDialogImpl(
         (myImportTarget.document as AbstractDocument).documentFilter = object : DocumentFilter() {
             override fun insertString(fb: FilterBypass?, offset: Int, string: String?, attr: AttributeSet?) {
                 if (string?.isBlank() == false) {
+                    //Only non whitespace input is allowed for the URL
                     super.insertString(fb, offset, string, attr)
                 }
             }

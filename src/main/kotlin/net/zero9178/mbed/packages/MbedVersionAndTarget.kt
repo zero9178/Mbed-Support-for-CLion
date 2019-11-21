@@ -24,6 +24,11 @@ import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
+/**
+ * Queries compatible targets for GCC_ARM
+ *
+ * @param mbedOsPath path to mbed-os
+ */
 fun queryCompatibleTargets(mbedOsPath: String): List<String> {
     val map = mutableSetOf<String>()
     val targetJson = Paths.get(mbedOsPath).resolve("targets").resolve("targets.json")
@@ -46,6 +51,10 @@ fun queryCompatibleTargets(mbedOsPath: String): List<String> {
     return map.toList()
 }
 
+/**
+ * Convenience function that queries targets and pops up a dialog with the query result
+ * @return null if the user closed the dialog, chosen item if not
+ */
 fun changeTargetDialog(project: Project): String? {
     val projectPath = project.basePath ?: return null
     var list: List<String> = emptyList()
@@ -63,6 +72,12 @@ fun changeTargetDialog(project: Project): String? {
     return result
 }
 
+/**
+ * Changes target for the project. Shows progress bar and blocks
+ *
+ * @param target Target to switch to
+ * @param project Project
+ */
 fun changeTarget(target: String, project: Project) {
     val projectPath = project.basePath ?: return
     val cli = MbedState.getInstance().cliPath
@@ -82,6 +97,11 @@ fun changeTarget(target: String, project: Project) {
     }))
 }
 
+/**
+ * Generates config headers and cmake file from mbed jsons. Does not return until generation is done
+ *
+ * @param project Project
+ */
 fun exportToCmake(project: Project) {
     val projectPath = project.basePath ?: return
     val cli = MbedState.getInstance().cliPath
@@ -102,6 +122,10 @@ fun exportToCmake(project: Project) {
     }
 }
 
+/**
+ * @param project Project
+ * @return target that has last been used to generate header and cmake files or null if no generation has ever taken
+ */
 fun getLastTarget(project: Project): String? {
     val projectPath = project.basePath ?: return null
     val cli = MbedState.getInstance().cliPath
@@ -126,6 +150,12 @@ class MbedPackage(val name: String, val repo: String?, val dependencies: Mutable
 
 class QueryPackageSuccess(val topMbedPackage: MbedPackage) : QueryPackageResult()
 
+/**
+ * Queries all packages of the project recursively and async
+ * @param project Project
+ * @return Future containing either a QueryPackageError with an error string or a QueryPackageSuccess with the top level
+ * package
+ */
 fun queryPackages(project: Project): CompletableFuture<QueryPackageResult> {
     val projectPath =
         project.basePath ?: return CompletableFuture.completedFuture(QueryPackageError("Project has no base path"))
@@ -144,9 +174,9 @@ fun queryPackages(project: Project): CompletableFuture<QueryPackageResult> {
         val topLevelPackage = mutableListOf<MbedPackage>()
         val packages = TreeMap<Int, MbedPackage>()
         for (line in lines) {
-            val offset = line.takeWhile { !it.isLetterOrDigit() }.length
-            val substring = line.substring(offset)
-            if (offset == 0) {
+            val indent = line.takeWhile { !it.isLetterOrDigit() }.length
+            val substring = line.substring(indent)
+            if (indent == 0) {
                 topLevelPackage += MbedPackage(
                     substring.substringBefore('(').trim(),
                     StringUtils.substringBetween(substring, "(", ")")
@@ -158,8 +188,8 @@ fun queryPackages(project: Project): CompletableFuture<QueryPackageResult> {
                         substring.substringBefore('(').trim(),
                         StringUtils.substringBetween(substring, "(", ")")
                     )
-                packages[offset] = newPackage
-                val parent = packages.entries.findLast { it.key < offset } ?: continue
+                packages[indent] = newPackage
+                val parent = packages.entries.findLast { it.key < indent } ?: continue
                 parent.value.dependencies += newPackage
             }
         }
@@ -168,6 +198,13 @@ fun queryPackages(project: Project): CompletableFuture<QueryPackageResult> {
     }
 }
 
+/**
+ * Queries releases of all packages of the project recursively and async
+ *
+ * @param project Project
+ * @return Future containing a map with package name as key and a pair containing optionally the current version as
+ * first value and all available versions as second
+ */
 fun queryReleases(project: Project): CompletableFuture<Map<String, Pair<String?, List<String>>>> {
     val projectPath = project.basePath ?: return CompletableFuture.completedFuture(emptyMap())
     val cli = MbedState.getInstance().cliPath
@@ -208,6 +245,14 @@ fun queryReleases(project: Project): CompletableFuture<Map<String, Pair<String?,
     }
 }
 
+/**
+ * Updates package to specified version
+ *
+ * @param path Path to the directory of the package
+ * @param version Version to update to
+ * @param project Project
+ * @return True if successful
+ */
 fun updatePackage(path: String, version: String, project: Project): Boolean {
     val cli = MbedState.getInstance().cliPath
     if (!File(cli).exists()) {

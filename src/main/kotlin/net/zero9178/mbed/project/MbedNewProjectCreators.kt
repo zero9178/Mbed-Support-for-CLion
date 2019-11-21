@@ -19,6 +19,9 @@ import org.apache.commons.exec.PumpStreamHandler
 import java.io.File
 import javax.swing.Icon
 
+/**
+ * Instantiated when creating a new project with the mbed-os wizard
+ */
 class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
 
     override fun generateProject(project: Project, virtualFile: VirtualFile, settings: Any, module: Module) {
@@ -36,6 +39,7 @@ class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
                             it.text = line ?: return
                         }
                     })
+                    //TODO: Error handling. execute throws upon non 0 exit code
                     exec.execute(cl)
                 }) {
                 changeTargetDialog(project)?.let { changeTarget(it, project) }

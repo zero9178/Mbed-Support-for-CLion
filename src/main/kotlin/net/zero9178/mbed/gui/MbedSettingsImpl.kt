@@ -8,6 +8,9 @@ import net.zero9178.mbed.state.MbedState
 import java.io.File
 import java.nio.file.Paths
 
+/**
+ * Settings GUI for changing CLI Path
+ */
 class MbedSettingsImpl : MbedSettings() {
 
     init {

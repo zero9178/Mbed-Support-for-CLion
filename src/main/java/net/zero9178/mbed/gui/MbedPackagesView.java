@@ -31,7 +31,7 @@ public abstract class MbedPackagesView {
         if (myPanel == null) {
 
             ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLWINDOW_CONTENT
-                    , new DefaultActionGroup(getActions()), false);
+                    , new DefaultActionGroup(getSideActions()), false);
             UIUtil.addBorder(actionToolbar.getComponent(), IdeBorderFactory.createBorder(JBColor.border(), SideBorder.RIGHT));
             UIUtil.addBorder(myTreeView.panel, IdeBorderFactory.createBorder(JBColor.border(), SideBorder.RIGHT));
             UIUtil.addBorder(myPackageView.panel, IdeBorderFactory.createBorder(JBColor.border(), SideBorder.LEFT));
@@ -54,16 +54,19 @@ public abstract class MbedPackagesView {
 
     public abstract List<MbedPackage> getPackages();
 
+    /**
+     * @return List of actions to display at the very left of the tool window
+     */
+    protected abstract List<? extends AnAction> getSideActions();
+
     protected static class PackageView {
         public JPanel panel;
         public JBLabel packageName;
         public JSeparator separator;
         public JBLabel currentRelease;
         public ComboBox<String> versionsAvailable;
-        public JButton confirmSwitch;
+        public JButton checkoutButton;
         public JBLabel repoLabel;
         public HyperlinkLabel repository;
     }
-
-    protected abstract List<? extends AnAction> getActions();
 }

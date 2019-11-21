@@ -10,9 +10,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-/**
- * @author Schülerlizenz 2019/20
- */
 public abstract class MbedSettings implements Configurable {
 
     protected TextFieldWithBrowseButton myCliPath;

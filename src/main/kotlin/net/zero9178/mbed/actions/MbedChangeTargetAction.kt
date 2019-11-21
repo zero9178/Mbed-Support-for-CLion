@@ -11,6 +11,10 @@ import net.zero9178.mbed.packages.changeTarget
 import net.zero9178.mbed.packages.changeTargetDialog
 import java.io.File
 
+/**
+ * Action showing up either in the 'Tools' menu or when right clicking the project base path.
+ * Pops up a dialog that let's one change target
+ */
 class MbedChangeTargetAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
