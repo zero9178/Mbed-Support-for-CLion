@@ -26,6 +26,10 @@
                 icon="MbedIcons.MBED_ICON_16x16">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
+        <action class="net.zero9178.mbed.actions.MbedSwitchProfile" id="Mbed.SwitchProfile"
+                icon="MbedIcons.MBED_ICON_16x16">
+            <add-to-group group-id="BuildMenu" anchor="last"/>
+        </action>
     </actions>
 
     <application-components>
@@ -52,12 +56,13 @@
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceInterface="net.zero9178.mbed.gui.MbedPackagesView"
                         serviceImplementation="net.zero9178.mbed.gui.MbedPackagesViewImpl"/>
+        <projectService serviceImplementation="net.zero9178.mbed.state.MbedProjectState"/>
         <editorNotificationProvider implementation="net.zero9178.mbed.editor.MbedAppLibRefreshProvider"/>
         <checkoutProvider implementation="net.zero9178.mbed.project.MbedImportCheckout"/>
         <directoryProjectGenerator implementation="net.zero9178.mbed.project.MbedNewProjectCreators"/>
         <applicationConfigurable groupId="tools" instance="net.zero9178.mbed.gui.MbedSettingsImpl" displayName="mbed"/>
         <iconProvider implementation="net.zero9178.mbed.MbedFolderIconProvider"/>
-        <toolWindow anchor="bottom" factoryClass="net.zero9178.mbed.gui.MbedPackagesViewFactory" id="mbed packages"
+        <toolWindow anchor="bottom" factoryClass="net.zero9178.mbed.gui.MbedPackagesViewFactory" id="mbed"
                     icon="MbedIcons.MBED_ICON_13x13" conditionClass="net.zero9178.mbed.gui.MbedPackagesViewFactory"/>
     </extensions>
 </idea-plugin>

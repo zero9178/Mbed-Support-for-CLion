@@ -12,6 +12,7 @@ import net.zero9178.mbed.MbedNotification
 import net.zero9178.mbed.ModalTask
 import net.zero9178.mbed.editor.MbedAppLibDirtyMarker
 import net.zero9178.mbed.gui.MbedTargetSelectImpl
+import net.zero9178.mbed.state.MbedProjectState
 import net.zero9178.mbed.state.MbedState
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
@@ -106,7 +107,14 @@ fun exportToCmake(project: Project) {
     val projectPath = project.basePath ?: return
     val cli = MbedState.getInstance().cliPath
     val process = ProcessBuilder().directory(File(projectPath)).redirectErrorStream(true)
-        .command(cli, "export", "-i", "cmake_gcc_arm").start()
+        .command(
+            cli,
+            "export",
+            "-i",
+            "cmake_gcc_arm",
+            "--profile",
+            if (MbedProjectState.getInstance(project).isRelease) "release" else "debug"
+        ).start()
     if (process.waitFor() == 0) {
         project.putUserData(MbedAppLibDirtyMarker.NEEDS_RELOAD, false)
         CMakeWorkspace.getInstance(project).scheduleReload(true)

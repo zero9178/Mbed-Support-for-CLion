@@ -24,8 +24,7 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version 'CL-2019.2.3'
-    downloadSources true
+    version 'CL-2019.3'
     plugins = ['clion-embedded','git4idea','hg4idea']
 }
 runIde {
