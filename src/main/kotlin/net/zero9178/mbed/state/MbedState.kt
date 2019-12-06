@@ -1,11 +1,7 @@
 package net.zero9178.mbed.state
 
 import com.intellij.execution.Platform
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.PersistentStateComponent
-import com.intellij.openapi.components.RoamingType
-import com.intellij.openapi.components.State
-import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.*
 import com.intellij.util.io.exists
 import java.io.File
 import java.nio.file.Paths
@@ -65,6 +61,6 @@ class MbedState : PersistentStateComponent<MbedState.State> {
         }
 
     companion object {
-        fun getInstance() = ApplicationManager.getApplication().getComponent(MbedState::class.java)!!
+        fun getInstance() = ServiceManager.getService(MbedState::class.java)!!
     }
 }

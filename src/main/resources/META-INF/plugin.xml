@@ -32,18 +32,6 @@
         </action>
     </actions>
 
-    <application-components>
-        <component>
-            <implementation-class>net.zero9178.mbed.state.MbedState</implementation-class>
-        </component>
-    </application-components>
-
-    <project-components>
-        <component>
-            <implementation-class>net.zero9178.mbed.editor.MbedAppLibDirtyMarker</implementation-class>
-        </component>
-    </project-components>
-
     <depends>com.intellij.clion.embedded</depends>
     <depends>com.intellij.modules.vcs</depends>
     <depends>Git4Idea</depends>
@@ -54,6 +42,8 @@
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
+        <backgroundPostStartupActivity implementation="net.zero9178.mbed.editor.MbedAppLibDirtyMarker"/>
+        <applicationService serviceImplementation="net.zero9178.mbed.state.MbedState"/>
         <projectService serviceInterface="net.zero9178.mbed.gui.MbedPackagesView"
                         serviceImplementation="net.zero9178.mbed.gui.MbedPackagesViewImpl"/>
         <projectService serviceImplementation="net.zero9178.mbed.state.MbedProjectState"/>
