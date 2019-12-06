@@ -12,6 +12,8 @@ import java.nio.file.Paths
 /**
  * Factory for tool window on the bottom of the IDE for package management. Only shows up project contains
  * an mbed_app.json file in the root directory
+ *
+ * TODO: Update to show once a mbed_app.json file exists
  */
 class MbedPackagesViewFactory : ToolWindowFactory, DumbAware, Condition<Project> {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {

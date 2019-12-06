@@ -42,7 +42,6 @@ class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
                     //TODO: Error handling. execute throws upon non 0 exit code
                     exec.execute(cl)
                 }) {
-                changeTargetDialog(project)?.let { changeTarget(it, project) }
                 virtualFile.writeChild(
                     "main.cpp",
                     """#include <mbed.h>
@@ -54,15 +53,12 @@ int main()
 
 """
                 )
-                virtualFile.writeChild(
-                    "project.cmake",
-                    """
-set(OWN_SOURCES main.cpp)
-target_sources(${project.name} PUBLIC ${"$"}{OWN_SOURCES})
-set_source_files_properties(${"$"}{OWN_SOURCES} PROPERTIES COMPILE_DEFINITIONS MBED_NO_GLOBAL_USING_DIRECTIVE)
-
-"""
-                )
+                if (virtualFile.findChild("mbed_app.json") == null) {
+                    virtualFile.writeChild(
+                        "mbed_app.json", """{}"""
+                    )
+                }
+                changeTargetDialog(project)?.let { changeTarget(it, project) }
                 CMakeWorkspace.getInstance(project).selectProjectDir(project.basePath?.let { File(it) })
             })
     }
