@@ -15,8 +15,12 @@ import net.zero9178.mbed.ModalTask
 import net.zero9178.mbed.packages.changeTarget
 import net.zero9178.mbed.packages.changeTargetDialog
 import net.zero9178.mbed.state.MbedState
-import org.apache.commons.exec.*
+import org.apache.commons.exec.CommandLine
+import org.apache.commons.exec.DefaultExecutor
+import org.apache.commons.exec.ExecuteException
+import org.apache.commons.exec.PumpStreamHandler
 import java.io.File
+import java.io.OutputStream
 import javax.swing.Icon
 
 /**
@@ -30,30 +34,37 @@ class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
                 project,
                 "Creating new Mbed os project",
                 {
+                    it.isIndeterminate = true
                     val cli = MbedState.getInstance().cliPath
-                    val cl = CommandLine.parse("$cli new .")
+                    val cl = CommandLine.parse("$cli new -vv .")
                     val exec = DefaultExecutor()
                     exec.workingDirectory = File(virtualFile.path)
-                    val err = mutableListOf<String>()
-                    exec.streamHandler = PumpStreamHandler(object : LogOutputStream() {
-                        override fun processLine(line: String?, logLevel: Int) {
-                            it.text = line ?: return
-                            err += line
+                    var output = ""
+                    exec.streamHandler = PumpStreamHandler(object : OutputStream() {
+                        private var flush = false
+                        override fun write(b: Int) {
+                            output += b.toChar()
+                            if (b.toChar() != '\n') {
+                                if (flush) {
+                                    flush = false
+                                    it.text = ""
+                                }
+                                it.text += b.toChar()
+                            } else {
+                                flush = true
+                            }
                         }
                     })
 
                     try {
                         exec.execute(cl)
                     } catch (e: ExecuteException) {
-                        // As far as I am aware it is impossible to fail a projekt generation according to CLion
-                        // Therefore we can't really cancel and must just notify the user of the error instead in the
-                        // hope that they will try again later
-                        val notification = MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
-                            "Failed to create mbed Project",
-                            "mbed exited with code ${e.exitValue} and stderr ${err.joinToString("\n")}",
-                            NotificationType.ERROR, null
+                        Notifications.Bus.notify(
+                            MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
+                                "mbed failed with exit code ${e.exitValue}\n Output: $output",
+                                NotificationType.ERROR
+                            )
                         )
-                        Notifications.Bus.notify(notification, project)
                     }
                 }) {
                 virtualFile.writeChild(
