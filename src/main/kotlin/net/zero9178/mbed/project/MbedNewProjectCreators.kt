@@ -1,5 +1,7 @@
 package net.zero9178.mbed.project
 
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
@@ -8,14 +10,12 @@ import com.intellij.testFramework.writeChild
 import com.jetbrains.cidr.cpp.cmake.projectWizard.generators.CLionProjectGenerator
 import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace
 import icons.MbedIcons
+import net.zero9178.mbed.MbedNotification
 import net.zero9178.mbed.ModalTask
 import net.zero9178.mbed.packages.changeTarget
 import net.zero9178.mbed.packages.changeTargetDialog
 import net.zero9178.mbed.state.MbedState
-import org.apache.commons.exec.CommandLine
-import org.apache.commons.exec.DefaultExecutor
-import org.apache.commons.exec.LogOutputStream
-import org.apache.commons.exec.PumpStreamHandler
+import org.apache.commons.exec.*
 import java.io.File
 import javax.swing.Icon
 
@@ -34,13 +34,27 @@ class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
                     val cl = CommandLine.parse("$cli new .")
                     val exec = DefaultExecutor()
                     exec.workingDirectory = File(virtualFile.path)
+                    val err = mutableListOf<String>()
                     exec.streamHandler = PumpStreamHandler(object : LogOutputStream() {
                         override fun processLine(line: String?, logLevel: Int) {
                             it.text = line ?: return
+                            err += line
                         }
                     })
-                    //TODO: Error handling. execute throws upon non 0 exit code
-                    exec.execute(cl)
+
+                    try {
+                        exec.execute(cl)
+                    } catch (e: ExecuteException) {
+                        // As far as I am aware it is impossible to fail a projekt generation according to CLion
+                        // Therefore we can't really cancel and must just notify the user of the error instead in the
+                        // hope that they will try again later
+                        val notification = MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
+                            "Failed to create mbed Project",
+                            "mbed exited with code ${e.exitValue} and stderr ${err.joinToString("\n")}",
+                            NotificationType.ERROR, null
+                        )
+                        Notifications.Bus.notify(notification, project)
+                    }
                 }) {
                 virtualFile.writeChild(
                     "main.cpp",

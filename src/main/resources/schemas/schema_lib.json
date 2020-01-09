@@ -64,6 +64,37 @@
           "null"
         ]
       },
+      "value_min": {
+        "description": "An optional field that defines the minimum acceptable value of the parameter",
+        "type": [
+          "integer",
+          "string",
+          "boolean",
+          "null"
+        ]
+      },
+      "value_max": {
+        "description": "An optional field that defines the maximum acceptable value of the parameter",
+        "type": [
+          "integer",
+          "string",
+          "boolean",
+          "null"
+        ]
+      },
+      "accepted_values": {
+        "description": "An optional field that defines a list of acceptable values for the parameter",
+        "type": "array",
+        "items": {
+          "type": [
+            "integer",
+            "string",
+            "boolean",
+            "null"
+          ]
+        },
+        "minItems": 1
+      },
       "required": {
         "description": "An optional field that specifies whether the parameter must be given a value before compiling the code. (False by default)",
         "type": "boolean"

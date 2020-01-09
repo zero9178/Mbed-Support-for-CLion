@@ -27,7 +27,7 @@ public abstract class MbedPackagesView {
     @NotNull
     protected TreeView myTreeView = new TreeView();
 
-    JPanel getPanel() {
+    public JPanel getPanel() {
         if (myPanel == null) {
 
             ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLWINDOW_CONTENT
