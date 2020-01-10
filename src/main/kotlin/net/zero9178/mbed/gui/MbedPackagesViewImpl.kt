@@ -28,11 +28,11 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
         myPackageView.panel.isVisible = false
         refreshTree()
         myTreeView.tree.selectionModel.selectionMode = SINGLE_TREE_SELECTION
-        myTreeView.tree.addTreeSelectionListener {
-            if (it.isAddedPath) {
+        myTreeView.tree.addTreeSelectionListener { event ->
+            if (event.isAddedPath) {
                 //New selection
                 myPackageView.panel.isVisible = true
-                val lastPathComponent = it.newLeadSelectionPath.lastPathComponent as DefaultMutableTreeNode
+                val lastPathComponent = event.newLeadSelectionPath.lastPathComponent as DefaultMutableTreeNode
                 val mbedPackage = lastPathComponent.userObject as MbedPackage
                 myPackageView.packageName.text = mbedPackage.name
                 if (mbedPackage.repo != null) {
@@ -46,7 +46,33 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
                 }
                 val releases = myReleaseMap[mbedPackage.name] ?: return@addTreeSelectionListener
                 myPackageView.currentRelease.text = releases.first ?: "<UNKNOWN>"
-                myPackageView.versionsAvailable.model = DefaultComboBoxModel(releases.second.toTypedArray())
+
+                data class ComparableTriple<A : Comparable<A>, B : Comparable<B>, C : Comparable<C>>(
+                    val first: A,
+                    val second: B,
+                    val third: C
+                ) : Comparable<ComparableTriple<A, B, C>> {
+                    override fun compareTo(other: ComparableTriple<A, B, C>): Int {
+                        var result = first.compareTo(other.first)
+                        if (result != 0) {
+                            return result
+                        }
+                        result = second.compareTo(other.second)
+                        if (result != 0) {
+                            return result
+                        }
+                        return third.compareTo(other.third)
+                    }
+                }
+                myPackageView.versionsAvailable.model = DefaultComboBoxModel(releases.second.sortedByDescending {
+                    val result = "(\\d+)\\.(\\d+)\\.(\\d+)".toRegex().find(it)
+                    if (result == null) {
+                        ComparableTriple(0, 0, 0)
+                    } else {
+                        val (first, second, third) = result.destructured
+                        ComparableTriple(first.toInt(), second.toInt(), third.toInt())
+                    }
+                }.toTypedArray())
                 if (releases.first != null) {
                     myPackageView.versionsAvailable.selectedItem = releases.first
                 }
