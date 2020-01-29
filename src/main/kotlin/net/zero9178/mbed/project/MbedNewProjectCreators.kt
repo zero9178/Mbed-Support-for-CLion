@@ -36,20 +36,22 @@ class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
                 {
                     it.isIndeterminate = true
                     val cli = MbedState.getInstance().cliPath
-                    val cl = CommandLine.parse("$cli new -vv .")
+                    val cl = CommandLine.parse("$cli new -v .")
                     val exec = DefaultExecutor()
                     exec.workingDirectory = File(virtualFile.path)
                     var output = ""
                     exec.streamHandler = PumpStreamHandler(object : OutputStream() {
                         private var flush = false
+                        private var buffer = ""
                         override fun write(b: Int) {
                             output += b.toChar()
                             if (b.toChar() != '\n') {
                                 if (flush) {
                                     flush = false
-                                    it.text = ""
+                                    it.text = buffer
+                                    buffer = ""
                                 }
-                                it.text += b.toChar()
+                                buffer += b.toChar()
                             } else {
                                 flush = true
                             }
