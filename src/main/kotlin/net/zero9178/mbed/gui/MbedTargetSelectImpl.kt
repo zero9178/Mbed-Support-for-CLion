@@ -22,7 +22,7 @@ class MbedTargetSelectImpl(
 ) : MbedTargetSelect(project, canBeParent, ideModalityType) {
     init {
         title = "Select initial target"
-        myTargets.model = DefaultComboBoxModel(targets.toTypedArray())
+        myTargets.model = DefaultComboBoxModel(targets.sorted().toTypedArray())
         val lastTarget = getLastTarget(project)
         myTargets.selectedItem = lastTarget ?: MbedState.getInstance().lastTarget
         if (lastTarget == null) {
