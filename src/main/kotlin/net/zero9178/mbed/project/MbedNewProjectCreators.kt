@@ -15,12 +15,8 @@ import net.zero9178.mbed.ModalTask
 import net.zero9178.mbed.packages.changeTarget
 import net.zero9178.mbed.packages.changeTargetDialog
 import net.zero9178.mbed.state.MbedState
-import org.apache.commons.exec.CommandLine
-import org.apache.commons.exec.DefaultExecutor
-import org.apache.commons.exec.ExecuteException
-import org.apache.commons.exec.PumpStreamHandler
+import org.apache.commons.exec.*
 import java.io.File
-import java.io.OutputStream
 import javax.swing.Icon
 
 /**
@@ -40,21 +36,10 @@ class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
                     val exec = DefaultExecutor()
                     exec.workingDirectory = File(virtualFile.path)
                     var output = ""
-                    exec.streamHandler = PumpStreamHandler(object : OutputStream() {
-                        private var flush = false
-                        private var buffer = ""
-                        override fun write(b: Int) {
-                            output += b.toChar()
-                            if (b.toChar() != '\n') {
-                                if (flush) {
-                                    flush = false
-                                    it.text = buffer
-                                    buffer = ""
-                                }
-                                buffer += b.toChar()
-                            } else {
-                                flush = true
-                            }
+                    exec.streamHandler = PumpStreamHandler(object : LogOutputStream() {
+                        override fun processLine(line: String?, logLevel: Int) {
+                            output += line ?: return
+                            it.text = line
                         }
                     })
 
@@ -71,14 +56,7 @@ class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
                 }) {
                 virtualFile.writeChild(
                     "main.cpp",
-                    """#include <mbed.h>
-
-int main()
-{
-
-}
-
-"""
+                    "#include <mbed.h>\n\nint main()\n{\n\n}\n\n"
                 )
                 if (virtualFile.findChild("mbed_app.json") == null) {
                     virtualFile.writeChild(
