@@ -61,6 +61,6 @@ class MbedState : PersistentStateComponent<MbedState.State> {
         }
 
     companion object {
-        fun getInstance() = ServiceManager.getService(MbedState::class.java)!!
+        fun getInstance() = service<MbedState>()
     }
 }

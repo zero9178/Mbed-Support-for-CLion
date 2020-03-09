@@ -4,6 +4,7 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import net.zero9178.mbed.ModalTask
@@ -108,7 +109,7 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
      */
     private fun refreshTree() {
         queryPackages(myProject).thenAccept {
-            ApplicationManager.getApplication().invokeLater {
+            invokeLater {
                 when (it) {
                     is QueryPackageError -> myTreeView.tree.emptyText.text = it.message
                     is QueryPackageSuccess -> {

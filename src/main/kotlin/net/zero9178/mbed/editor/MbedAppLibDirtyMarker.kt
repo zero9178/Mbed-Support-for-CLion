@@ -57,7 +57,7 @@ class MbedAppLibDirtyMarker : StartupActivity.Background {
         if (Paths.get(basePath).resolve("mbed_app.json").exists()) {
             create()
         }
-        project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, object : BulkFileListener {
+        project.messageBus.connect(project).subscribe(VirtualFileManager.VFS_CHANGES, object : BulkFileListener {
             override fun after(events: MutableList<out VFileEvent>) {
                 events.forEach {
                     when (it) {
