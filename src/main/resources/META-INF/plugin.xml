@@ -42,6 +42,7 @@
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
+        <directoryProjectGenerator implementation="net.zero9178.mbed.project.MbedNewProjectCreators"/>
         <backgroundPostStartupActivity implementation="net.zero9178.mbed.editor.MbedAppLibDirtyMarker"/>
         <applicationService serviceImplementation="net.zero9178.mbed.state.MbedState"/>
         <projectService serviceInterface="net.zero9178.mbed.gui.MbedPackagesView"
@@ -49,8 +50,7 @@
         <projectService serviceImplementation="net.zero9178.mbed.state.MbedProjectState"/>
         <editorNotificationProvider implementation="net.zero9178.mbed.editor.MbedAppLibRefreshProvider"/>
         <checkoutProvider implementation="net.zero9178.mbed.project.MbedImportCheckout"/>
-        <directoryProjectGenerator implementation="net.zero9178.mbed.project.MbedNewProjectCreators"/>
-        <applicationConfigurable groupId="tools" instance="net.zero9178.mbed.gui.MbedSettingsImpl" displayName="mbed"/>
+        <applicationConfigurable groupId="tools" instance="net.zero9178.mbed.gui.MbedSettingsImpl" displayName="Mbed"/>
         <iconProvider implementation="net.zero9178.mbed.MbedFolderIconProvider"/>
     </extensions>
 </idea-plugin>
