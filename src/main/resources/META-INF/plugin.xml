@@ -19,7 +19,6 @@
                 text="Change Target Board"
                 icon="MbedIcons.MBED_ICON_16x16">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
-            <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
         <action class="net.zero9178.mbed.actions.MbedReloadChangesAction" id="Mbed.ReloadChanges"
                 text="Reload Mbed Project"
@@ -43,14 +42,14 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <directoryProjectGenerator implementation="net.zero9178.mbed.project.MbedNewProjectCreators"/>
-        <backgroundPostStartupActivity implementation="net.zero9178.mbed.editor.MbedAppLibDirtyMarker"/>
-        <applicationService serviceImplementation="net.zero9178.mbed.state.MbedState"/>
-        <projectService serviceInterface="net.zero9178.mbed.gui.MbedPackagesView"
-                        serviceImplementation="net.zero9178.mbed.gui.MbedPackagesViewImpl"/>
-        <projectService serviceImplementation="net.zero9178.mbed.state.MbedProjectState"/>
+        <backgroundPostStartupActivity implementation="net.zero9178.mbed.editor.MbedAppLibDaemon"/>
         <editorNotificationProvider implementation="net.zero9178.mbed.editor.MbedAppLibRefreshProvider"/>
         <checkoutProvider implementation="net.zero9178.mbed.project.MbedImportCheckout"/>
-        <applicationConfigurable groupId="tools" instance="net.zero9178.mbed.gui.MbedSettingsImpl" displayName="Mbed"/>
+        <projectService serviceInterface="net.zero9178.mbed.gui.MbedPackagesView"
+                        serviceImplementation="net.zero9178.mbed.gui.MbedPackagesViewImpl"/>
+        <applicationService serviceImplementation="net.zero9178.mbed.state.MbedState"/>
         <iconProvider implementation="net.zero9178.mbed.MbedFolderIconProvider"/>
+        <projectService serviceImplementation="net.zero9178.mbed.state.MbedProjectState"/>
+        <applicationConfigurable groupId="tools" instance="net.zero9178.mbed.gui.MbedSettingsImpl" displayName="Mbed"/>
     </extensions>
 </idea-plugin>

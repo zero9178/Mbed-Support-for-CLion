@@ -10,12 +10,13 @@ import com.intellij.openapi.project.Project
 import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace
 import net.zero9178.mbed.MbedNotification
 import net.zero9178.mbed.ModalTask
-import net.zero9178.mbed.editor.MbedAppLibDirtyMarker
+import net.zero9178.mbed.editor.MbedAppLibDaemon
 import net.zero9178.mbed.gui.MbedTargetSelectImpl
 import net.zero9178.mbed.state.MbedProjectState
 import net.zero9178.mbed.state.MbedState
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
+import org.apache.commons.exec.ExecuteException
 import org.apache.commons.exec.PumpStreamHandler
 import org.apache.commons.lang.StringUtils
 import java.io.ByteArrayOutputStream
@@ -116,7 +117,7 @@ fun exportToCmake(project: Project) {
             if (MbedProjectState.getInstance(project).isRelease) "release" else "debug"
         ).start()
     if (process.waitFor() == 0) {
-        project.putUserData(MbedAppLibDirtyMarker.NEEDS_RELOAD, false)
+        project.putUserData(MbedAppLibDaemon.NEEDS_RELOAD, false)
         CMakeWorkspace.getInstance(project).scheduleReload(true)
     } else {
         val output = process.inputStream.bufferedReader().readLines().joinToString("\n")
@@ -152,11 +153,11 @@ sealed class QueryPackageResult
 
 class QueryPackageError(val message: String) : QueryPackageResult()
 
+class QueryPackageSuccess(val topMbedPackage: MbedPackage) : QueryPackageResult()
+
 class MbedPackage(val name: String, val repo: String?, val dependencies: MutableList<MbedPackage> = mutableListOf()) {
     override fun toString() = name
 }
-
-class QueryPackageSuccess(val topMbedPackage: MbedPackage) : QueryPackageResult()
 
 /**
  * Queries all packages of the project recursively and async
@@ -231,14 +232,14 @@ fun queryReleases(project: Project): CompletableFuture<Map<String, Pair<String?,
         var currentName: String? = null
         val map = mutableMapOf<String, Pair<String?, List<String>>>()
         for (line in lines) {
-            val index = line.indexOfFirst { it.isLetterOrDigit() }
-            if (index == 0 || (index > 1 && (line[index - 2] == '-'))) {
+            val indent = line.indexOfFirst { it.isLetterOrDigit() }
+            if (indent == 0 || (indent > 1 && (line[indent - 2] == '-'))) {
                 current = null to mutableListOf()
-                val trim = line.substring(index).substringBefore('(').trim()
+                val trim = line.substring(indent).substringBefore('(').trim()
                 map[trim] = current
                 currentName = trim
-            } else if (line.substring(0, index).contains('*')) {
-                val tag = line.substring(index)
+            } else if (line.substring(0, indent).contains('*')) {
+                val tag = line.substring(indent)
                 if (tag.endsWith("<- current") && currentName != null) {
                     val fixed = tag.removeSuffix("<- current").trim()
                     current = fixed to (current?.second?.let { it + fixed }?.toMutableList() ?: mutableListOf())
@@ -271,17 +272,17 @@ fun updatePackage(path: String, version: String, project: Project): Boolean {
     exec.workingDirectory = File(path)
     val output = ByteArrayOutputStream()
     exec.streamHandler = PumpStreamHandler(output)
-    val exitCode = exec.execute(cl)
-    return if (exitCode != 0) {
+    return try {
+        exec.execute(cl)
+        true
+    } catch (e: ExecuteException) {
         Notifications.Bus.notify(
             MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
-                "mbed update failed with error code $exitCode and output: $output",
+                "mbed update failed with error code ${e.exitValue} and output: $output",
                 NotificationType.ERROR
             ),
             project
         )
         false
-    } else {
-        true
     }
 }

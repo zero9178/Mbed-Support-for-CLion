@@ -3,7 +3,6 @@ package net.zero9178.mbed.gui
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
@@ -11,6 +10,8 @@ import net.zero9178.mbed.ModalTask
 import net.zero9178.mbed.actions.MbedReloadChangesAction
 import net.zero9178.mbed.packages.*
 import java.nio.file.Paths
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.DefaultComboBoxModel
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
@@ -22,6 +23,7 @@ import javax.swing.tree.TreeSelectionModel.SINGLE_TREE_SELECTION
 class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() {
     private val myFlatPackageList = mutableListOf<MbedPackage>()
     private var myReleaseMap = mapOf<String, Pair<String?, List<String>>>()
+    private val myIsQuerying = AtomicBoolean(false)
 
     override fun getPackages(): List<MbedPackage> = myFlatPackageList
 
@@ -30,56 +32,56 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
         refreshTree()
         myTreeView.tree.selectionModel.selectionMode = SINGLE_TREE_SELECTION
         myTreeView.tree.addTreeSelectionListener { event ->
-            if (event.isAddedPath) {
-                //New selection
-                myPackageView.panel.isVisible = true
-                val lastPathComponent = event.newLeadSelectionPath.lastPathComponent as DefaultMutableTreeNode
-                val mbedPackage = lastPathComponent.userObject as MbedPackage
-                myPackageView.packageName.text = mbedPackage.name
-                if (mbedPackage.repo != null) {
-                    myPackageView.repoLabel.isVisible = true
-                    myPackageView.repository.isVisible = true
-                    myPackageView.repository.setHyperlinkText(mbedPackage.repo)
-                    myPackageView.repository.setHyperlinkTarget(mbedPackage.repo)
-                } else {
-                    myPackageView.repoLabel.isVisible = false
-                    myPackageView.repository.isVisible = false
-                }
-                val releases = myReleaseMap[mbedPackage.name] ?: return@addTreeSelectionListener
-                myPackageView.currentRelease.text = releases.first ?: "<UNKNOWN>"
-
-                data class ComparableTriple<A : Comparable<A>, B : Comparable<B>, C : Comparable<C>>(
-                    val first: A,
-                    val second: B,
-                    val third: C
-                ) : Comparable<ComparableTriple<A, B, C>> {
-                    override fun compareTo(other: ComparableTriple<A, B, C>): Int {
-                        var result = first.compareTo(other.first)
-                        if (result != 0) {
-                            return result
-                        }
-                        result = second.compareTo(other.second)
-                        if (result != 0) {
-                            return result
-                        }
-                        return third.compareTo(other.third)
-                    }
-                }
-                myPackageView.versionsAvailable.model = DefaultComboBoxModel(releases.second.sortedByDescending {
-                    val result = "(\\d+)\\.(\\d+)\\.(\\d+)".toRegex().find(it)
-                    if (result == null) {
-                        ComparableTriple(0, 0, 0)
-                    } else {
-                        val (first, second, third) = result.destructured
-                        ComparableTriple(first.toInt(), second.toInt(), third.toInt())
-                    }
-                }.toTypedArray())
-                if (releases.first != null) {
-                    myPackageView.versionsAvailable.selectedItem = releases.first
-                }
-            } else {
+            if (!event.isAddedPath) {
                 //Deselection
                 myPackageView.panel.isVisible = false
+                return@addTreeSelectionListener
+            }
+            //New selection
+            myPackageView.panel.isVisible = true
+            val lastPathComponent = event.newLeadSelectionPath.lastPathComponent as DefaultMutableTreeNode
+            val mbedPackage = lastPathComponent.userObject as MbedPackage
+            myPackageView.packageName.text = mbedPackage.name
+            if (mbedPackage.repo != null) {
+                myPackageView.repoLabel.isVisible = true
+                myPackageView.repository.isVisible = true
+                myPackageView.repository.setHyperlinkText(mbedPackage.repo)
+                myPackageView.repository.setHyperlinkTarget(mbedPackage.repo)
+            } else {
+                myPackageView.repoLabel.isVisible = false
+                myPackageView.repository.isVisible = false
+            }
+            val releases = myReleaseMap[mbedPackage.name] ?: return@addTreeSelectionListener
+            myPackageView.currentRelease.text = releases.first ?: "<UNKNOWN>"
+
+            data class ComparableTriple<A : Comparable<A>, B : Comparable<B>, C : Comparable<C>>(
+                val first: A,
+                val second: B,
+                val third: C
+            ) : Comparable<ComparableTriple<A, B, C>> {
+                override fun compareTo(other: ComparableTriple<A, B, C>): Int {
+                    var result = first.compareTo(other.first)
+                    if (result != 0) {
+                        return result
+                    }
+                    result = second.compareTo(other.second)
+                    if (result != 0) {
+                        return result
+                    }
+                    return third.compareTo(other.third)
+                }
+            }
+            myPackageView.versionsAvailable.model = DefaultComboBoxModel(releases.second.sortedByDescending {
+                val result = "(\\d+)\\.(\\d+)\\.(\\d+)".toRegex().find(it)
+                if (result == null) {
+                    ComparableTriple(0, 0, 0)
+                } else {
+                    val (first, second, third) = result.destructured
+                    ComparableTriple(first.toInt(), second.toInt(), third.toInt())
+                }
+            }.toTypedArray())
+            if (releases.first != null) {
+                myPackageView.versionsAvailable.selectedItem = releases.first
             }
         }
         myPackageView.checkoutButton.addActionListener {
@@ -108,7 +110,10 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
      * Refreshes dependencies of application async
      */
     private fun refreshTree() {
-        queryPackages(myProject).thenAccept {
+        if (!myIsQuerying.compareAndSet(false, true)) {
+            return
+        }
+        val packageFuture = queryPackages(myProject).thenAccept {
             invokeLater {
                 when (it) {
                     is QueryPackageError -> myTreeView.tree.emptyText.text = it.message
@@ -121,11 +126,13 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
                 }
             }
         }
-
-        queryReleases(myProject).thenAccept {
-            ApplicationManager.getApplication().invokeLater {
+        val releaseFuture = queryReleases(myProject).thenAccept {
+            invokeLater {
                 myReleaseMap = it
             }
+        }
+        CompletableFuture.allOf(packageFuture, releaseFuture).handle { _, _ ->
+            myIsQuerying.set(false)
         }
     }
 

@@ -17,7 +17,11 @@ class MbedSwitchProfile : AnAction() {
     override fun update(e: AnActionEvent) {
         val project = e.project
         e.presentation.isEnabledAndVisible =
-            project?.let { it.basePath?.let { Paths.get(it).resolve("mbed_app.json").exists() } } ?: false
+            project?.let {
+                it.basePath?.let { path ->
+                    Paths.get(path).resolve("mbed_app.json").exists()
+                }
+            } ?: false
         if (e.presentation.isEnabledAndVisible && project != null) {
             e.presentation.text =
                 "Switch to ${if (MbedProjectState.getInstance(project).isRelease) "Debug" else "Release"}"

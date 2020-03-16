@@ -3,13 +3,14 @@ package net.zero9178.mbed.actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.progress.ProgressManager
 import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace
 import net.zero9178.mbed.ModalTask
 import net.zero9178.mbed.packages.changeTarget
 import net.zero9178.mbed.packages.changeTargetDialog
 import java.io.File
+import javax.swing.SwingUtilities.invokeAndWait
 
 /**
  * Action showing up either in the 'Tools' menu or when right clicking the project base path.
@@ -22,8 +23,8 @@ class MbedChangeTargetAction : AnAction() {
         val workspace = CMakeWorkspace.getInstance(project)
         val target = changeTargetDialog(project) ?: return
         ProgressManager.getInstance().run(ModalTask(project, "Changing target", {
-            ApplicationManager.getApplication().invokeAndWait {
-                ApplicationManager.getApplication().runWriteAction {
+            invokeAndWait {
+                runWriteAction {
                     workspace.shutdown()
                     changeTarget(target, project)
                     workspace.selectProjectDir(project.basePath?.let { File(it) })

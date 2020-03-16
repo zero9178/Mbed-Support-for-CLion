@@ -1,6 +1,6 @@
 package net.zero9178.mbed.editor
 
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -26,7 +26,7 @@ import java.nio.file.Paths
  * Per project component which records if any files called mbed_lib.json or mbed_app.json have changed since last
  * cmake regeneration. Sets NEEDS_RELOAD on the project when needed
  */
-class MbedAppLibDirtyMarker : StartupActivity.Background {
+class MbedAppLibDaemon : StartupActivity.Background {
 
     companion object {
         val NEEDS_RELOAD = Key<Boolean>("MBED_NEEDS_RELOAD")
@@ -36,7 +36,7 @@ class MbedAppLibDirtyMarker : StartupActivity.Background {
     override fun runActivity(project: Project) {
         val basePath = project.basePath ?: return
         val create = {
-            ApplicationManager.getApplication().invokeLater {
+            invokeLater {
                 val toolWindow = ToolWindowManager.getInstance(project)
                     .registerToolWindow(ID, false, ToolWindowAnchor.BOTTOM, project, true)
                 toolWindow.icon = MbedIcons.MBED_ICON_13x13
@@ -57,6 +57,7 @@ class MbedAppLibDirtyMarker : StartupActivity.Background {
         if (Paths.get(basePath).resolve("mbed_app.json").exists()) {
             create()
         }
+
         project.messageBus.connect(project).subscribe(VirtualFileManager.VFS_CHANGES, object : BulkFileListener {
             override fun after(events: MutableList<out VFileEvent>) {
                 events.forEach {
@@ -75,6 +76,7 @@ class MbedAppLibDirtyMarker : StartupActivity.Background {
                 }
             }
         })
+
         EditorFactory.getInstance().eventMulticaster.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 val vfs =

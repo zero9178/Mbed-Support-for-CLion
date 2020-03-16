@@ -14,10 +14,10 @@ import com.intellij.ui.EditorNotifications
 class MbedAppLibRefreshProvider : EditorNotifications.Provider<EditorNotificationPanel>(), DumbAware {
 
     companion object {
-        private val ourKey = Key<EditorNotificationPanel>("MbedAppLibRefresh")
+        private val OUR_KEY = Key<EditorNotificationPanel>("MbedAppLibRefresh")
     }
 
-    override fun getKey(): Key<EditorNotificationPanel> = ourKey
+    override fun getKey(): Key<EditorNotificationPanel> = OUR_KEY
 
     override fun createNotificationPanel(
         file: VirtualFile,
@@ -30,7 +30,7 @@ class MbedAppLibRefreshProvider : EditorNotifications.Provider<EditorNotificatio
         if (file.name != "mbed_app.json" && file.name != "mbed_lib.json") {
             return null
         }
-        if (project.getUserData(MbedAppLibDirtyMarker.NEEDS_RELOAD) == true) {
+        if (project.getUserData(MbedAppLibDaemon.NEEDS_RELOAD) == true) {
             val panel = EditorNotificationPanel()
             panel.setText("Mbed project needs to be reloaded")
             panel.createActionLabel("Reload changes", "Mbed.ReloadChanges")
