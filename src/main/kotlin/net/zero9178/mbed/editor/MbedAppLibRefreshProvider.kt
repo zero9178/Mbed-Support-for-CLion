@@ -27,7 +27,7 @@ class MbedAppLibRefreshProvider : EditorNotifications.Provider<EditorNotificatio
         if (project.isDisposed) {
             return null
         }
-        if (file.name != "mbed_app.json" && file.name != "mbed_lib.json") {
+        if (file.name.toLowerCase() != "mbed_app.json" && file.name.toLowerCase() != "mbed_lib.json") {
             return null
         }
         if (project.getUserData(MbedAppLibDaemon.NEEDS_RELOAD) == true) {

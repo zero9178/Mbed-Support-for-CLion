@@ -63,12 +63,12 @@ class MbedAppLibDaemon : StartupActivity.Background {
                 events.forEach {
                     when (it) {
                         is VFileCreateEvent -> {
-                            if (it.file?.name == "mbed_app.json") {
+                            if (it.file?.name?.toLowerCase() == "mbed_app.json") {
                                 create()
                             }
                         }
                         is VFileDeleteEvent -> {
-                            if (it.file.name == "mbed_app.json") {
+                            if (it.file.name.toLowerCase() == "mbed_app.json") {
                                 ToolWindowManager.getInstance(project).unregisterToolWindow(ID)
                             }
                         }
@@ -81,7 +81,7 @@ class MbedAppLibDaemon : StartupActivity.Background {
             override fun documentChanged(event: DocumentEvent) {
                 val vfs =
                     FileDocumentManager.getInstance().getFile(event.document) ?: return super.documentChanged(event)
-                if (vfs.name == "mbed_lib.json" || vfs.name == "mbed_app.json") {
+                if (vfs.name.toLowerCase() == "mbed_lib.json" || vfs.name.toLowerCase() == "mbed_app.json") {
                     project.putUserData(NEEDS_RELOAD, true)
                     EditorNotifications.getInstance(project).updateNotifications(vfs)
                 }
