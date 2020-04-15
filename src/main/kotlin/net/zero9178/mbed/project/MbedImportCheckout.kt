@@ -2,7 +2,6 @@ package net.zero9178.mbed.project
 
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.application.TransactionGuard
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
@@ -58,21 +57,19 @@ class MbedImportCheckout : CheckoutProvider {
                     }
                 })
         )
-        TransactionGuard.getInstance().submitTransactionAndWait {
-            if (Paths.get(dialog.getDirectory()).resolve(".git").exists()) {
-                listener?.directoryCheckedOut(File(dialog.getDirectory()), GitVcs.getKey())
-            } else {
-                listener?.directoryCheckedOut(File(dialog.getDirectory()), HgVcs.getKey())
-            }
-            listener?.checkoutCompleted()
-            val newProject = ProjectManager.getInstance().openProjects.find {
-                it.basePath == dialog.getDirectory().replace('\\', '/')
-            } //finds just created project. We can't use the project variable passed from the function as its just a
-            // temporary empty project for the checkout process
-            if (newProject != null) {
-                changeTargetDialog(newProject)?.let { changeTarget(it, newProject) }
-                CMakeWorkspace.getInstance(newProject).selectProjectDir(newProject.basePath?.let { File(it) })
-            }
+        if (Paths.get(dialog.getDirectory()).resolve(".git").exists()) {
+            listener?.directoryCheckedOut(File(dialog.getDirectory()), GitVcs.getKey())
+        } else {
+            listener?.directoryCheckedOut(File(dialog.getDirectory()), HgVcs.getKey())
+        }
+        listener?.checkoutCompleted()
+        val newProject = ProjectManager.getInstance().openProjects.find {
+            it.basePath == dialog.getDirectory().replace('\\', '/')
+        } //finds just created project. We can't use the project variable passed from the function as its just a
+        // temporary empty project for the checkout process
+        if (newProject != null) {
+            changeTargetDialog(newProject)?.let { changeTarget(it, newProject) }
+            CMakeWorkspace.getInstance(newProject).selectProjectDir(newProject.basePath?.let { File(it) })
         }
     }
 

@@ -39,10 +39,10 @@ class MbedAppLibDaemon : StartupActivity.Background {
             invokeLater {
                 val toolWindow = ToolWindowManager.getInstance(project)
                     .registerToolWindow(ID, false, ToolWindowAnchor.BOTTOM, project, true)
-                toolWindow.icon = MbedIcons.MBED_ICON_13x13
+                toolWindow.setIcon(MbedIcons.MBED_ICON_13x13)
                 val packageView = MbedPackagesView.getInstance(project)
                 toolWindow.title = "Mbed"
-                toolWindow.stripeTitle = toolWindow.title
+                toolWindow.stripeTitle = toolWindow.title ?: ""
                 val content = ContentFactory.SERVICE.getInstance().createContent(
                     packageView.panel,
                     "",

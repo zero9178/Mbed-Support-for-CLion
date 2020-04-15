@@ -25,7 +25,7 @@ class MbedChangeTargetAction : AnAction() {
         ProgressManager.getInstance().run(ModalTask(project, "Changing target", {
             invokeAndWait {
                 runWriteAction {
-                    workspace.shutdown()
+                    workspace.unload(false)
                     changeTarget(target, project)
                     workspace.selectProjectDir(project.basePath?.let { File(it) })
                 }
