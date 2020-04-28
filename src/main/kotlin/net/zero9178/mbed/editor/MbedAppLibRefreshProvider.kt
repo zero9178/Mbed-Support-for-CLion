@@ -30,7 +30,7 @@ class MbedAppLibRefreshProvider : EditorNotifications.Provider<EditorNotificatio
         if (file.name.toLowerCase() != "mbed_app.json" && file.name.toLowerCase() != "mbed_lib.json") {
             return null
         }
-        if (project.getUserData(MbedAppLibDaemon.NEEDS_RELOAD) == true) {
+        if (project.getUserData(MbedAppLibDaemon.PROJECT_NEEDS_RELOAD) == true) {
             val panel = EditorNotificationPanel()
             panel.setText("Mbed project needs to be reloaded")
             panel.createActionLabel("Reload changes", "Mbed.ReloadChanges")

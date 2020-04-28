@@ -2,11 +2,11 @@ package net.zero9178.mbed.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.util.io.exists
+import com.intellij.openapi.project.DumbAware
+import net.zero9178.mbed.editor.MbedAppLibDaemon
 import net.zero9178.mbed.state.MbedProjectState
-import java.nio.file.Paths
 
-class MbedSwitchProfile : AnAction() {
+class MbedSwitchProfile : AnAction(), DumbAware {
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
@@ -16,13 +16,11 @@ class MbedSwitchProfile : AnAction() {
 
     override fun update(e: AnActionEvent) {
         val project = e.project
-        e.presentation.isEnabledAndVisible =
-            project?.let {
-                it.basePath?.let { path ->
-                    Paths.get(path).resolve("mbed_app.json").exists()
-                }
-            } ?: false
-        if (e.presentation.isEnabledAndVisible && project != null) {
+        if (project?.getUserData(MbedAppLibDaemon.PROJECT_IS_MBED_PROJECT) != true) {
+            e.presentation.isEnabledAndVisible = false
+            return
+        }
+        if (e.presentation.isEnabledAndVisible) {
             e.presentation.text =
                 "Switch to ${if (MbedProjectState.getInstance(project).isRelease) "Debug" else "Release"}"
         }

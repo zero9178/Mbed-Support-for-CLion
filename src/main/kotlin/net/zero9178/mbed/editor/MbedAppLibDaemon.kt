@@ -18,6 +18,7 @@ import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.EditorNotifications
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.io.exists
+import com.intellij.util.messages.Topic
 import icons.MbedIcons
 import net.zero9178.mbed.gui.MbedPackagesView
 import java.nio.file.Paths
@@ -29,8 +30,18 @@ import java.nio.file.Paths
 class MbedAppLibDaemon : StartupActivity.Background {
 
     companion object {
-        val NEEDS_RELOAD = Key<Boolean>("MBED_NEEDS_RELOAD")
+        val PROJECT_NEEDS_RELOAD = Key<Boolean>("MBED_NEEDS_RELOAD")
+
+        @JvmStatic
+        val PROJECT_IS_MBED_PROJECT = Key<Boolean>("IS_MBED_PROJECT")
+
+        @JvmStatic
+        val MBED_PROJECT_CHANGED = Topic.create("MBED_PROJECT_CHANGED", MbedAppListener::class.java)
         private const val ID = "MBED_PACKAGE_VIEW"
+    }
+
+    interface MbedAppListener {
+        fun statusChanged(isMbedProject: Boolean) {}
     }
 
     override fun runActivity(project: Project) {
@@ -55,7 +66,10 @@ class MbedAppLibDaemon : StartupActivity.Background {
             }
         }
         if (Paths.get(basePath).resolve("mbed_app.json").exists()) {
+            project.putUserData(PROJECT_IS_MBED_PROJECT, true)
             create()
+        } else {
+            project.putUserData(PROJECT_IS_MBED_PROJECT, false)
         }
 
         project.messageBus.connect(project).subscribe(VirtualFileManager.VFS_CHANGES, object : BulkFileListener {
@@ -67,11 +81,15 @@ class MbedAppLibDaemon : StartupActivity.Background {
                     when (it) {
                         is VFileCreateEvent -> {
                             if (it.file?.name?.toLowerCase() == "mbed_app.json") {
+                                project.putUserData(PROJECT_IS_MBED_PROJECT, true)
+                                project.messageBus.syncPublisher(MBED_PROJECT_CHANGED).statusChanged(true)
                                 create()
                             }
                         }
                         is VFileDeleteEvent -> {
                             if (it.file.name.toLowerCase() == "mbed_app.json") {
+                                project.putUserData(PROJECT_IS_MBED_PROJECT, false)
+                                project.messageBus.syncPublisher(MBED_PROJECT_CHANGED).statusChanged(false)
                                 ToolWindowManager.getInstance(project).unregisterToolWindow(ID)
                             }
                         }
@@ -85,7 +103,7 @@ class MbedAppLibDaemon : StartupActivity.Background {
                 val vfs =
                     FileDocumentManager.getInstance().getFile(event.document) ?: return super.documentChanged(event)
                 if (vfs.name.toLowerCase() == "mbed_lib.json" || vfs.name.toLowerCase() == "mbed_app.json") {
-                    project.putUserData(NEEDS_RELOAD, true)
+                    project.putUserData(PROJECT_NEEDS_RELOAD, true)
                     EditorNotifications.getInstance(project).updateNotifications(vfs)
                 }
                 super.documentChanged(event)

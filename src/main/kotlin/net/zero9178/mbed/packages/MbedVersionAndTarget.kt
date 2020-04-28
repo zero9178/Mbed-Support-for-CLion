@@ -112,7 +112,7 @@ fun exportToCmake(project: Project) {
             if (MbedProjectState.getInstance(project).isRelease) "release" else "debug"
         ).start()
     if (process.waitFor() == 0) {
-        project.putUserData(MbedAppLibDaemon.NEEDS_RELOAD, false)
+        project.putUserData(MbedAppLibDaemon.PROJECT_NEEDS_RELOAD, false)
         CMakeWorkspace.getInstance(project).scheduleReload(true)
     } else {
         val output = process.inputStream.bufferedReader().readLines().joinToString("\n")
