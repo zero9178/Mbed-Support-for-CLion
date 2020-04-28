@@ -60,6 +60,9 @@ class MbedAppLibDaemon : StartupActivity.Background {
 
         project.messageBus.connect(project).subscribe(VirtualFileManager.VFS_CHANGES, object : BulkFileListener {
             override fun after(events: MutableList<out VFileEvent>) {
+                if (project.isDisposed) {
+                    return
+                }
                 events.forEach {
                     when (it) {
                         is VFileCreateEvent -> {

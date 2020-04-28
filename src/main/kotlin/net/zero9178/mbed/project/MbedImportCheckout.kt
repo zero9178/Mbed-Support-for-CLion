@@ -1,10 +1,15 @@
 package net.zero9178.mbed.project
 
+import com.intellij.execution.configurations.PtyCommandLine
+import com.intellij.execution.process.OSProcessHandler
+import com.intellij.execution.process.ProcessAdapter
+import com.intellij.execution.process.ProcessEvent
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vcs.CheckoutProvider
 import com.intellij.util.io.exists
 import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace
@@ -14,7 +19,6 @@ import net.zero9178.mbed.ModalTask
 import net.zero9178.mbed.packages.changeTarget
 import net.zero9178.mbed.packages.changeTargetDialog
 import net.zero9178.mbed.state.MbedState
-import org.apache.commons.exec.*
 import org.zmlx.hg4idea.HgVcs
 import java.io.File
 import java.nio.file.Paths
@@ -36,21 +40,29 @@ class MbedImportCheckout : CheckoutProvider {
                 "Importing mbed project",
                 {
                     val cli = MbedState.getInstance().cliPath
-                    val cl = CommandLine.parse("$cli import ${dialog.getImportTarget()} ${dialog.getDirectory()}")
-                    val exec = DefaultExecutor()
-                    val output = mutableListOf<String>()
-                    exec.streamHandler = PumpStreamHandler(object : LogOutputStream() {
-                        override fun processLine(line: String?, logLevel: Int) {
-                            it.text = line ?: return
-                            output += line
+                    val handler = OSProcessHandler(
+                        PtyCommandLine(
+                            listOf(
+                                cli,
+                                "import",
+                                dialog.getImportTarget(),
+                                dialog.getDirectory()
+                            )
+                        )
+                    )
+                    var output = ""
+                    handler.addProcessListener(object : ProcessAdapter() {
+                        override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                            it.text += event.text
+                            output += event.text
                         }
                     })
-                    try {
-                        exec.execute(cl)
-                    } catch (e: ExecuteException) {
+                    handler.startNotify()
+                    handler.waitFor()
+                    if (handler.exitCode != 0) {
                         Notifications.Bus.notify(
                             MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
-                                "mbed failed with exit code ${e.exitValue}\n Output: ${output.joinToString("\n")}",
+                                "mbed failed with exit code ${handler.exitCode}\n Output: $output",
                                 NotificationType.ERROR
                             )
                         )

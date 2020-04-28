@@ -14,12 +14,7 @@ import net.zero9178.mbed.editor.MbedAppLibDaemon
 import net.zero9178.mbed.gui.MbedTargetSelectImpl
 import net.zero9178.mbed.state.MbedProjectState
 import net.zero9178.mbed.state.MbedState
-import org.apache.commons.exec.CommandLine
-import org.apache.commons.exec.DefaultExecutor
-import org.apache.commons.exec.ExecuteException
-import org.apache.commons.exec.PumpStreamHandler
 import org.apache.commons.lang.StringUtils
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.nio.file.Paths
@@ -267,22 +262,18 @@ fun updatePackage(path: String, version: String, project: Project): Boolean {
     if (!File(cli).exists()) {
         return false
     }
-    val cl = CommandLine.parse("$cli update $version")
-    val exec = DefaultExecutor()
-    exec.workingDirectory = File(path)
-    val output = ByteArrayOutputStream()
-    exec.streamHandler = PumpStreamHandler(output)
-    return try {
-        exec.execute(cl)
-        true
-    } catch (e: ExecuteException) {
+    val p = ProcessBuilder().directory(File(path)).command(cli, "upadte", version).start()
+    return if (p.waitFor() != 0) {
+        val lines = p.inputStream.bufferedReader().readLines()
         Notifications.Bus.notify(
             MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
-                "mbed update failed with error code ${e.exitValue} and output: $output",
+                "mbed update failed with error code ${p.exitValue()} and output: ${lines.joinToString("\n")}",
                 NotificationType.ERROR
             ),
             project
         )
         false
+    } else {
+        true
     }
 }

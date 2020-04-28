@@ -1,10 +1,15 @@
 package net.zero9178.mbed.project
 
+import com.intellij.execution.configurations.PtyCommandLine
+import com.intellij.execution.process.OSProcessHandler
+import com.intellij.execution.process.ProcessAdapter
+import com.intellij.execution.process.ProcessEvent
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.testFramework.writeChild
 import com.jetbrains.cidr.cpp.cmake.projectWizard.generators.CLionProjectGenerator
@@ -15,7 +20,6 @@ import net.zero9178.mbed.ModalTask
 import net.zero9178.mbed.packages.changeTarget
 import net.zero9178.mbed.packages.changeTargetDialog
 import net.zero9178.mbed.state.MbedState
-import org.apache.commons.exec.*
 import java.io.File
 import javax.swing.Icon
 
@@ -32,27 +36,24 @@ class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
                 {
                     it.isIndeterminate = true
                     val cli = MbedState.getInstance().cliPath
-                    val cl = CommandLine.parse("$cli new -v .")
-                    val exec = DefaultExecutor()
-                    exec.workingDirectory = File(virtualFile.path)
-                    var output = ""
-                    exec.streamHandler = PumpStreamHandler(object : LogOutputStream() {
-                        override fun processLine(line: String?, logLevel: Int) {
-                            output += line ?: return
-                            it.text = line
+
+                    val handle = OSProcessHandler(
+                        PtyCommandLine(
+                            listOf(
+                                cli,
+                                "new",
+                                "-v",
+                                "."
+                            )
+                        ).withWorkDirectory(virtualFile.path).withCharset(Charsets.UTF_8)
+                    )
+                    handle.addProcessListener(object : ProcessAdapter() {
+                        override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                            it.text += event.text
                         }
                     })
-
-                    try {
-                        exec.execute(cl)
-                    } catch (e: ExecuteException) {
-                        Notifications.Bus.notify(
-                            MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
-                                "mbed failed with exit code ${e.exitValue}\n Output: $output",
-                                NotificationType.ERROR
-                            )
-                        )
-                    }
+                    handle.startNotify()
+                    handle.waitFor()
                 }) {
                 virtualFile.writeChild(
                     "main.cpp",
@@ -64,6 +65,14 @@ class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
                     )
                 }
                 changeTargetDialog(project)?.let { changeTarget(it, project) }
+                if (project.name.contains("\\s".toRegex())) {
+                    Notifications.Bus.notify(
+                        MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
+                            "Project name contains spaces which might lead to failure when loading the CMake project",
+                            NotificationType.WARNING
+                        )
+                    )
+                }
                 CMakeWorkspace.getInstance(project).selectProjectDir(project.basePath?.let { File(it) })
             })
     }
