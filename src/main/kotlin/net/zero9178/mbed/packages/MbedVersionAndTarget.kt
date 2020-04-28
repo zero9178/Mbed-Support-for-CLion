@@ -189,8 +189,8 @@ fun queryPackages(project: Project): CompletableFuture<QueryPackageResult> {
     return CompletableFuture.supplyAsync {
         val start = ProcessBuilder().directory(File(projectPath)).command(cli, "ls", "-a").start()
         if (start.waitFor() != 0) {
-            val lines = start.inputStream.bufferedReader().readLines()
-            return@supplyAsync QueryPackageError("CLI failed with error ${lines.joinToString("\n")}")
+            val lines = start.errorStream.bufferedReader().readLines()
+            return@supplyAsync QueryPackageError("CLI failed with error: ${lines.joinToString("\n")}")
         }
         val lines = start.inputStream.bufferedReader().readLines().dropWhile { it.first() == '[' }
         val topLevelPackage = mutableListOf<MbedPackage>()
