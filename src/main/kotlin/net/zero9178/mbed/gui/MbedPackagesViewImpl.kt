@@ -6,6 +6,9 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.ui.SpeedSearchComparator
+import com.intellij.ui.TreeSpeedSearch
+import com.intellij.util.ui.tree.TreeUtil
 import net.zero9178.mbed.ModalTask
 import net.zero9178.mbed.actions.MbedReloadChangesAction
 import net.zero9178.mbed.packages.*
@@ -84,6 +87,7 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
                 myPackageView.versionsAvailable.selectedItem = releases.first
             }
         }
+        TreeSpeedSearch(myTreeView.tree).comparator = SpeedSearchComparator(false)
         myPackageView.checkoutButton.addActionListener {
             val array = myTreeView.tree.selectionPath?.path?.run {
                 slice(1..lastIndex)
@@ -118,10 +122,23 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
                 when (it) {
                     is QueryPackageError -> myTreeView.tree.emptyText.text = it.message
                     is QueryPackageSuccess -> {
+                        val selected = myTreeView.tree.lastSelectedPathComponent as? DefaultMutableTreeNode
+                        val selectedPackage = selected?.userObject as? MbedPackage
+                        val list = TreeUtil.collectExpandedUserObjects(myTreeView.tree).filterIsInstance<MbedPackage>()
                         myFlatPackageList.clear()
                         val root = DefaultMutableTreeNode("invisible-root")
                         insertPackages(root, listOf(it.topMbedPackage))
                         myTreeView.tree.model = DefaultTreeModel(root)
+                        TreeUtil.treeNodeTraverser(root).forEach { node ->
+                            if (node !is DefaultMutableTreeNode) return@forEach
+                            val mbedPackage = node.userObject as? MbedPackage ?: return@forEach
+                            if (list.any { it == mbedPackage }) {
+                                myTreeView.tree.expandPath(TreeUtil.getPathFromRoot(node))
+                            }
+                            if (mbedPackage == selectedPackage) {
+                                myTreeView.tree.selectionPath = TreeUtil.getPathFromRoot(node)
+                            }
+                        }
                     }
                 }
             }

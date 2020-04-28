@@ -19,6 +19,7 @@
                 text="Change Target Board"
                 icon="MbedIcons.MBED_ICON_16x16">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+            <add-to-group group-id="BuildMenu" anchor="last"/>
         </action>
         <action class="net.zero9178.mbed.actions.MbedReloadChangesAction" id="Mbed.ReloadChanges"
                 text="Reload Mbed Project"

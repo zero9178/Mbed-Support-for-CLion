@@ -152,6 +152,24 @@ class QueryPackageSuccess(val topMbedPackage: MbedPackage) : QueryPackageResult(
 
 class MbedPackage(val name: String, val repo: String?, val dependencies: MutableList<MbedPackage> = mutableListOf()) {
     override fun toString() = name
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MbedPackage
+
+        if (name != other.name) return false
+        if (repo != other.repo) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + (repo?.hashCode() ?: 0)
+        return result
+    }
 }
 
 /**
@@ -234,7 +252,7 @@ fun queryReleases(project: Project): CompletableFuture<Map<String, Pair<String?,
                 map[trim] = current
                 currentName = trim
             } else if (line.substring(0, indent).contains('*')) {
-                val tag = line.substring(indent)
+                val tag = line.substring(indent).trim()
                 if (tag.endsWith("<- current") && currentName != null) {
                     val fixed = tag.removeSuffix("<- current").trim()
                     current = fixed to (current?.second?.let { it + fixed }?.toMutableList() ?: mutableListOf())
@@ -262,8 +280,9 @@ fun updatePackage(path: String, version: String, project: Project): Boolean {
     if (!File(cli).exists()) {
         return false
     }
-    val p = ProcessBuilder().directory(File(path)).command(cli, "upadte", version).start()
-    return if (p.waitFor() != 0) {
+    val p = ProcessBuilder().directory(File(path)).command(cli, "update", version).redirectErrorStream(true).start()
+    p.waitFor()
+    return if (p.exitValue() != 0) {
         val lines = p.inputStream.bufferedReader().readLines()
         Notifications.Bus.notify(
             MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(

@@ -34,7 +34,7 @@ class MbedChangeTargetAction : AnAction() {
     }
 
     override fun update(e: AnActionEvent) {
-        val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE)
-        e.presentation.isEnabledAndVisible = virtualFile?.path == e.project?.basePath
+        val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+        e.presentation.isEnabledAndVisible = virtualFile.path == e.project?.basePath
     }
 }
