@@ -1,6 +1,5 @@
 package net.zero9178.mbed.editor
 
-import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -13,14 +12,9 @@ import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileDeleteEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
-import com.intellij.openapi.wm.ToolWindowAnchor
-import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.EditorNotifications
-import com.intellij.ui.content.ContentFactory
 import com.intellij.util.io.exists
 import com.intellij.util.messages.Topic
-import icons.MbedIcons
-import net.zero9178.mbed.gui.MbedPackagesView
 import java.nio.file.Paths
 
 /**
@@ -37,7 +31,6 @@ class MbedAppLibDaemon : StartupActivity.Background {
 
         @JvmStatic
         val MBED_PROJECT_CHANGED = Topic.create("MBED_PROJECT_CHANGED", MbedAppListener::class.java)
-        private const val ID = "MBED_PACKAGE_VIEW"
     }
 
     interface MbedAppListener {
@@ -46,53 +39,23 @@ class MbedAppLibDaemon : StartupActivity.Background {
 
     override fun runActivity(project: Project) {
         val basePath = project.basePath ?: return
-        val create = {
-            invokeLater {
-                val toolWindow = ToolWindowManager.getInstance(project)
-                    .registerToolWindow(ID, false, ToolWindowAnchor.BOTTOM, project, true)
-                toolWindow.setIcon(MbedIcons.MBED_ICON_13x13)
-                val packageView = MbedPackagesView.getInstance(project)
-                toolWindow.title = "Mbed"
-                toolWindow.stripeTitle = toolWindow.title ?: ""
-                val content = ContentFactory.SERVICE.getInstance().createContent(
-                    packageView.panel,
-                    "",
-                    false
-                )
-                content.preferredFocusableComponent = packageView.panel
-                toolWindow.contentManager.addContent(
-                    content
-                )
-            }
-        }
-        if (Paths.get(basePath).resolve("mbed_app.json").exists()) {
-            project.putUserData(PROJECT_IS_MBED_PROJECT, true)
-            create()
-        } else {
-            project.putUserData(PROJECT_IS_MBED_PROJECT, false)
-        }
-
+        val exists = Paths.get(basePath).resolve("mbed_app.json").exists()
+        project.putUserData(PROJECT_IS_MBED_PROJECT, exists)
+        project.messageBus.syncPublisher(MBED_PROJECT_CHANGED).statusChanged(exists)
         project.messageBus.connect(project).subscribe(VirtualFileManager.VFS_CHANGES, object : BulkFileListener {
             override fun after(events: MutableList<out VFileEvent>) {
                 if (project.isDisposed) {
                     return
                 }
                 events.forEach {
-                    when (it) {
-                        is VFileCreateEvent -> {
-                            if (it.file?.name?.toLowerCase() == "mbed_app.json") {
-                                project.putUserData(PROJECT_IS_MBED_PROJECT, true)
-                                project.messageBus.syncPublisher(MBED_PROJECT_CHANGED).statusChanged(true)
-                                create()
-                            }
+                    if (it.file?.name?.toLowerCase() == "mbed_app.json") {
+                        val value = when (it) {
+                            is VFileCreateEvent -> true
+                            is VFileDeleteEvent -> false
+                            else -> return@forEach
                         }
-                        is VFileDeleteEvent -> {
-                            if (it.file.name.toLowerCase() == "mbed_app.json") {
-                                project.putUserData(PROJECT_IS_MBED_PROJECT, false)
-                                project.messageBus.syncPublisher(MBED_PROJECT_CHANGED).statusChanged(false)
-                                ToolWindowManager.getInstance(project).unregisterToolWindow(ID)
-                            }
-                        }
+                        project.putUserData(PROJECT_IS_MBED_PROJECT, value)
+                        project.messageBus.syncPublisher(MBED_PROJECT_CHANGED).statusChanged(value)
                     }
                 }
             }

@@ -42,6 +42,8 @@
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Mbed OS" factoryClass="net.zero9178.mbed.gui.MbedPackagesViewFactory"
+                    icon="MbedIcons.MBED_ICON_13x13" anchor="bottom"/>
         <directoryProjectGenerator implementation="net.zero9178.mbed.project.MbedNewProjectCreators"/>
         <backgroundPostStartupActivity implementation="net.zero9178.mbed.editor.MbedAppLibDaemon"/>
         <editorNotificationProvider implementation="net.zero9178.mbed.editor.MbedAppLibRefreshProvider"/>

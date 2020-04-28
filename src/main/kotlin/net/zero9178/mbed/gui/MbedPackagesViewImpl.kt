@@ -32,7 +32,6 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
 
     init {
         myPackageView.panel.isVisible = false
-        refreshTree()
         myTreeView.tree.selectionModel.selectionMode = SINGLE_TREE_SELECTION
         myTreeView.tree.addTreeSelectionListener { event ->
             if (!event.isAddedPath) {
@@ -108,6 +107,7 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
                 }
             })
         }
+        refreshTree()
     }
 
     /**
