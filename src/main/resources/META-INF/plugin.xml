@@ -53,6 +53,7 @@
         <applicationService serviceImplementation="net.zero9178.mbed.state.MbedState"/>
         <iconProvider implementation="net.zero9178.mbed.MbedFolderIconProvider"/>
         <projectService serviceImplementation="net.zero9178.mbed.state.MbedProjectState"/>
+        <applicationService serviceImplementation="net.zero9178.mbed.project.MbedRememberedInputs"/>
         <applicationConfigurable groupId="tools" instance="net.zero9178.mbed.gui.MbedSettingsImpl" displayName="Mbed"/>
     </extensions>
 </idea-plugin>
