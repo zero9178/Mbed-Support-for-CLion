@@ -1,7 +1,7 @@
 <idea-plugin>
-    <id>net.zero9178.mbed-os-wizard</id>
-    <name>MbedOsWizard</name>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <id>net.zero9178.mbed-support</id>
+    <name>Mbed Support</name>
+    <vendor email="z3r09178@gmail.com" url="http://www.yourcompany.com"/>
 
     <description><![CDATA[
     Enter short description for your plugin here.<br>
@@ -42,7 +42,7 @@
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="Mbed OS" factoryClass="net.zero9178.mbed.gui.MbedPackagesViewFactory"
+        <toolWindow id="Mbed" factoryClass="net.zero9178.mbed.gui.MbedPackagesViewFactory"
                     icon="MbedIcons.MBED_ICON_13x13" anchor="bottom"/>
         <directoryProjectGenerator implementation="net.zero9178.mbed.project.MbedNewProjectCreators"/>
         <backgroundPostStartupActivity implementation="net.zero9178.mbed.editor.MbedAppLibDaemon"/>
