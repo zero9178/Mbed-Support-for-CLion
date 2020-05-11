@@ -105,9 +105,9 @@ of all dependencies of the project and allows changing the version of dependenci
  add its location in the PATH and specify `-GNinja` in the CMake options in the Settings under 
  `Build, Execution, Deployment -> CMake`. Using Ninja instead of make leads to faster compile times for both incremental
  and full builds.
-* Enable Repository caching: Simply enter `mbed cache on` to enable Repository caching. The mbed-cli will then cache 
-  downloads of repositories and reuse them when possible. This allows for faster project creation as well as creating
-  new projects without an internet connection. 
+* Enable Repository caching: Simply enter `mbed cache on` in a terminal to enable Repository caching. The mbed-cli will 
+  then cache downloads of repositories and reuse them when possible. This allows for faster project creation as well as 
+  creating new projects without an internet connection. 
   
 ## Known Issues/TODOs
 * When working on Windows, and the base path of the project has too many characters the project may not compile.
