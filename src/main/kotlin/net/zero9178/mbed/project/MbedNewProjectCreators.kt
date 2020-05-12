@@ -79,7 +79,7 @@ class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
 
     override fun getName(): String = "Mbed"
 
-    override fun getLogo(): Icon? = MbedIcons.MBED_ICON_16x16
+    override fun getLogo(): Icon? = MbedIcons.PLUGIN_ICON_16x16
 
     override fun getGroupName() = "mbed"
 }

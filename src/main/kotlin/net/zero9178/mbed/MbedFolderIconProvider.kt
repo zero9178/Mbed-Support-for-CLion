@@ -7,7 +7,7 @@ import icons.MbedIcons
 import net.zero9178.mbed.gui.MbedPackagesView
 
 /**
- * Changes folder icon to overlay the mbed logo if the folder is a mbed package
+ * Changes folder icon to overlay the plugin logo if the folder is a mbed package
  */
 class MbedFolderIconProvider : IconProvider() {
     override fun getIcon(element: PsiElement, flags: Int) =
@@ -17,7 +17,7 @@ class MbedFolderIconProvider : IconProvider() {
                 it.name == element.name
             } == true
         ) {
-            MbedIcons.MBED_FOLDER
+            MbedIcons.PLUGIN_FOLDER
         } else {
             null
         }

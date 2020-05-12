@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.zero9178.mbed-support</id>
     <name>Mbed Support</name>
-    <vendor email="z3r09178@gmail.com" url="http://www.yourcompany.com"/>
+    <vendor email="z3r09178@gmail.com" url="https://github.com/zero9178/Mbed-Support-for-CLion"/>
 
     <description><![CDATA[
     Enter short description for your plugin here.<br>
@@ -17,17 +17,17 @@
     <actions>
         <action class="net.zero9178.mbed.actions.MbedChangeTargetAction" id="Mbed.ChangeTarget"
                 text="Change Target Board"
-                icon="MbedIcons.MBED_ICON_16x16">
+                icon="MbedIcons.PLUGIN_ICON_16x16">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
             <add-to-group group-id="BuildMenu" anchor="last"/>
         </action>
         <action class="net.zero9178.mbed.actions.MbedReloadChangesAction" id="Mbed.ReloadChanges"
                 text="Reload Mbed Project"
-                icon="MbedIcons.MBED_ICON_16x16">
+                icon="MbedIcons.PLUGIN_ICON_16x16">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
         <action class="net.zero9178.mbed.actions.MbedSwitchProfile" id="Mbed.SwitchProfile"
-                icon="MbedIcons.MBED_ICON_16x16">
+                icon="MbedIcons.PLUGIN_ICON_16x16">
             <add-to-group group-id="BuildMenu" anchor="last"/>
         </action>
     </actions>
@@ -43,7 +43,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Mbed" factoryClass="net.zero9178.mbed.gui.MbedPackagesViewFactory"
-                    icon="MbedIcons.MBED_ICON_13x13" anchor="bottom"/>
+                    icon="MbedIcons.PLUGIN_ICON_13x13" anchor="bottom"/>
         <directoryProjectGenerator implementation="net.zero9178.mbed.project.MbedNewProjectCreators"/>
         <backgroundPostStartupActivity implementation="net.zero9178.mbed.editor.MbedAppLibDaemon"/>
         <editorNotificationProvider implementation="net.zero9178.mbed.editor.MbedAppLibRefreshProvider"/>
