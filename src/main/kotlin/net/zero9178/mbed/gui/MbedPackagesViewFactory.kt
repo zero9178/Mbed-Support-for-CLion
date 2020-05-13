@@ -19,6 +19,13 @@ class MbedPackagesViewFactory : ToolWindowFactory, DumbAware {
             .subscribe(MbedAppLibDaemon.MBED_PROJECT_CHANGED, object : MbedAppLibDaemon.MbedAppListener {
                 override fun statusChanged(isMbedProject: Boolean) {
                     runInEdt {
+                        // Initialize PackageView so that we can figure out which folders are packages
+                        // and change their icon
+                        if (isMbedProject) {
+                            MbedPackagesView.getInstance(project).refreshTree()
+                        } else {
+                            MbedPackagesView.getInstance(project).clear()
+                        }
                         toolWindow.isAvailable = isMbedProject
                     }
                 }

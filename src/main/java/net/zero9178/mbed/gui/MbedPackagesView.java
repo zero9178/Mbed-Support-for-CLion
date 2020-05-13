@@ -68,4 +68,8 @@ public abstract class MbedPackagesView {
      * @return List of actions to display at the very left of the tool window
      */
     protected abstract List<? extends AnAction> getSideActions();
+
+    public abstract void refreshTree();
+
+    public abstract void clear();
 }

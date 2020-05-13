@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.SpeedSearchComparator
 import com.intellij.ui.TreeSpeedSearch
 import com.intellij.util.ui.tree.TreeUtil
@@ -107,13 +108,12 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
                 }
             })
         }
-        refreshTree()
     }
 
     /**
      * Refreshes dependencies of application async
      */
-    private fun refreshTree() {
+    override fun refreshTree() {
         if (!myIsQuerying.compareAndSet(false, true)) {
             return
         }
@@ -150,6 +150,9 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
         }
         CompletableFuture.allOf(packageFuture, releaseFuture).handle { _, _ ->
             myIsQuerying.set(false)
+            val basePath = myProject.basePath ?: return@handle
+            val file = LocalFileSystem.getInstance().findFileByPath(basePath) ?: return@handle
+            file.refresh(false, false)
         }
     }
 
@@ -168,5 +171,13 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
                 refreshTree()
             }
         })
+    }
+
+    override fun clear() {
+        myReleaseMap = emptyMap()
+        myFlatPackageList.clear()
+        val basePath = myProject.basePath ?: return
+        val file = LocalFileSystem.getInstance().findFileByPath(basePath) ?: return
+        file.refresh(false, false)
     }
 }
