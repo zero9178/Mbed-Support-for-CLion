@@ -26,13 +26,13 @@ Recommended method of installation is using python's package manager pip, and th
 New Mbed projects can be created using CLions new project dialog. Simply select Mbed and enter a valid location in the 
 right.
 
-<NEW_PROJECT_DIALOG_SCREENSHOT>
+![alt-text](https://i.imgur.com/d7qLPal.png "New Project Menu")
 
 After pressing the create button a new window will open and the plugin starts downloading the newest Mbed OS version 
 from the Github repo. As soon as the download has finished a new dialog will appear asking which Mbed Target should be 
 used. This option can be changed later at any time. 
 
-<TARGET_DIALOG_SCREENSHOT>
+![alt-text](https://imgur.com/UarcAWg.png "Select Target Dialog")
 
 After pressing okay a cmake project will be generated from the Mbed project and CLion should start indexing and 
 updating symbols. To further configure your project the file mbed_app.json has been created. To start programing
@@ -44,11 +44,11 @@ To fetch existing Mbed projects from Git or Mercurial the `mbed import` function
 In the `Get from Version Control` dialog simply select `mbed import` as Version Control and enter the URL to the 
 repository. 
 
-<GET_FROM_VERSION_CONTROL_SCREENSHOT>
+![alt-text](https://imgur.com/CFbV6Hf.png "mbed import Version Control")
 
 For importing examples provided by Mbed OS the repository name can be specified instead of the URL.
 
-<GET_MBED_OS_EXAMPLE_LORAWAN_SCREENSHOT>
+![alt-text](https://imgur.com/6mZ7hjb.png "mbed import repository names")
 
 For additional options such as branch, tag or commit hash see:
 https://os.mbed.com/docs/mbed-os/v5.15/tools/working-with-mbed-cli.html
@@ -67,20 +67,20 @@ https://os.mbed.com/docs/mbed-os/v5.15/reference/configuration.html
 The plugin ships with a schema that provides Code Completion, documentation and checks for validity
 of the `mbed_app.json` file.
 
-<CODE_COMPLETION_AND_DOC_SCREENSHOT>
+![alt-text](https://imgur.com/WQHGm73.png "Code completion in mbed_app.json")
 
 After changes have been done the file a prompt will appear at the top, similar to the reload-prompt inside of 
 CMakeLists.txt for normal C++ projects, and prompt to reload the Mbed project. A new CMakeLists.txt file is then created 
 using the configs in the `mbed_app.json` file.
 
-<RELOAD_PROMPT_SCREENSHOT>
+![alt-text](https://imgur.com/KmcQjF4.png "Prompt to reload Mbed project")
 
 ### Changing Target
 
 The Mbed target can be changed at any time in the project. Either right click the project root and select 
 `Change Target Board` or go to `Build -> Change Target Board`.
 
-<CHANGE_TARGET_BOARD_CONTEXT_MENU>
+![alt-text](https://imgur.com/DGtfAz7.png "Change Target Board context menu")
 
 ### Build Modes
 
@@ -88,16 +88,14 @@ By default, code is compiled in debug mode with optimizations turned off. To swi
 for size go to `Build -> Switch to Release`. A dialog regenerating the cmake project should appear. Use the menu
 `Build -> Switch to Debug` to switch back to unoptimized code.
 
-<SWITCH_TO_RELEASE_SCREENSHOT>
+![alt-text](https://imgur.com/gvlNFsd.png "Switch to Release context menu")
 
 ### Package Management
 
 For managing Mbed OS packages a tool window labeled "Mbed" exists at the bottom of the screen. It provides a tree view
 of all dependencies of the project and allows changing the version of dependencies and sub dependencies. 
 
-<DEPENDENCY_TREE_SCREENSHOT>
-
-<CHANGING_VERSION_SCREENSHOT>
+![alt-text](https://imgur.com/lZdZRyt.png "Dependency tree toolwindow with version select")
 
 ## Tips for Development
 
