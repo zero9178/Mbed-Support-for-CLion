@@ -1,8 +1,10 @@
 package net.zero9178.mbed.gui
 
 import com.intellij.icons.AllIcons
+import com.intellij.ide.projectView.ProjectView
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.invokeAndWaitIfNeeded
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
@@ -118,7 +120,7 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
             return
         }
         val packageFuture = queryPackages(myProject).thenAccept {
-            invokeLater {
+            invokeAndWaitIfNeeded {
                 when (it) {
                     is QueryPackageError -> myTreeView.tree.emptyText.text = it.message
                     is QueryPackageSuccess -> {
@@ -150,9 +152,7 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
         }
         CompletableFuture.allOf(packageFuture, releaseFuture).handle { _, _ ->
             myIsQuerying.set(false)
-            val basePath = myProject.basePath ?: return@handle
-            val file = LocalFileSystem.getInstance().findFileByPath(basePath) ?: return@handle
-            file.refresh(false, false)
+            ProjectView.getInstance(myProject).refresh()
         }
     }
 
