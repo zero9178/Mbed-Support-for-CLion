@@ -4,8 +4,10 @@
     <vendor email="z3r09178@gmail.com" url="https://github.com/zero9178/Mbed-Support-for-CLion"/>
 
     <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
+    Plugin adding support for the Mbed ecosystem for CLion. Create new projects, edit project configurations,
+     import existing projects, change microcontroller board and manage dependencies.
+     <br/>
+     For further details and documentation see <a href="https://github.com/zero9178/Mbed-Support-for-CLion/blob/master/README.md">https://github.com/zero9178/Mbed-Support-for-CLion/blob/master/README.md</a>
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html

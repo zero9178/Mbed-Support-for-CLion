@@ -37,6 +37,6 @@ compileTestKotlin {
 }
 patchPluginXml {
     changeNotes """
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>"""
+      2020.1.0: <br/>
+      Initial Release"""
 }
