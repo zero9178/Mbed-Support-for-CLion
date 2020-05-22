@@ -30,7 +30,7 @@ import com.intellij.util.ui.components.BorderLayoutPanel
 import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace
 import git4idea.GitVcs
 import net.zero9178.mbed.MbedNotification
-import net.zero9178.mbed.ModalTask
+import net.zero9178.mbed.MbedSyncTask
 import net.zero9178.mbed.packages.changeTarget
 import net.zero9178.mbed.packages.changeTargetDialog
 import net.zero9178.mbed.state.MbedState
@@ -126,7 +126,7 @@ class MbedImportCheckoutDialogImpl(private val project: Project) : VcsCloneCompo
     override fun doClone(project: Project, listener: CheckoutProvider.Listener) {
         val directory = directoryField.text.trim()
         ProgressManager.getInstance().run(
-            ModalTask(
+            MbedSyncTask(
                 project,
                 "Importing mbed project",
                 {

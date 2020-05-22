@@ -7,7 +7,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.ui.EditorNotifications
-import net.zero9178.mbed.ModalTask
+import net.zero9178.mbed.MbedAsyncTask
 import net.zero9178.mbed.editor.MbedAppLibDaemon
 import net.zero9178.mbed.packages.exportToCmake
 
@@ -32,7 +32,7 @@ class MbedReloadChangesAction : AnAction(), DumbAware {
     companion object {
         fun update(project: Project) {
             FileDocumentManager.getInstance().saveAllDocuments()
-            ProgressManager.getInstance().run(ModalTask(project, "Generating cmake", {
+            ProgressManager.getInstance().run(MbedAsyncTask(project, "Generating cmake", {
                 exportToCmake(project)
             }) {
                 EditorNotifications.getInstance(project).updateAllNotifications()
