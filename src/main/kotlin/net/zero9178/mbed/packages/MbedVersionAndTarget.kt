@@ -8,8 +8,9 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace
+import net.zero9178.mbed.MbedAsyncTask
 import net.zero9178.mbed.MbedNotification
-import net.zero9178.mbed.ModalTask
+import net.zero9178.mbed.MbedSyncTask
 import net.zero9178.mbed.editor.MbedAppLibDaemon
 import net.zero9178.mbed.gui.MbedTargetSelectImpl
 import net.zero9178.mbed.state.MbedProjectState
@@ -20,6 +21,7 @@ import java.io.FileInputStream
 import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 
 /**
  * Queries compatible targets for GCC_ARM
@@ -56,7 +58,7 @@ fun changeTargetDialog(project: Project): String? {
     val projectPath = project.basePath ?: return null
     var list: List<String> = emptyList()
     var result: String? = null
-    ProgressManager.getInstance().run(ModalTask(project, "Querying targets", {
+    ProgressManager.getInstance().run(MbedSyncTask(project, "Querying targets", {
         list = queryCompatibleTargets(Paths.get(projectPath).resolve("mbed-os").toString())
     }) {
         val dialog = MbedTargetSelectImpl(list, project)
@@ -78,9 +80,19 @@ fun changeTargetDialog(project: Project): String? {
 fun changeTarget(target: String, project: Project) {
     val projectPath = project.basePath ?: return
     val cli = MbedState.getInstance().cliPath
-    ProgressManager.getInstance().run(ModalTask(project, "Generating cmake", {
+    ProgressManager.getInstance().run(MbedAsyncTask(project, "Generating cmake", {
         val process = ProcessBuilder().directory(File(projectPath)).command(cli, "target", target).start()
-        if (process.waitFor() != 0) {
+        if (!process.waitFor(10, TimeUnit.SECONDS)) {
+            val output = process.inputStream.bufferedReader().readLines().joinToString("\n")
+            Notifications.Bus.notify(
+                MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
+                    "mbed process timed out while setting target with output: $output",
+                    NotificationType.ERROR
+                ), project
+            )
+            return@MbedAsyncTask
+        }
+        if (process.exitValue() != 0) {
             val output = process.inputStream.bufferedReader().readLines().joinToString("\n")
             Notifications.Bus.notify(
                 MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
@@ -88,7 +100,7 @@ fun changeTarget(target: String, project: Project) {
                     NotificationType.ERROR
                 ), project
             )
-            return@ModalTask
+            return@MbedAsyncTask
         }
         exportToCmake(project)
     }))
@@ -111,7 +123,18 @@ fun exportToCmake(project: Project) {
             "--profile",
             if (MbedProjectState.getInstance(project).isRelease) "release" else "debug"
         ).start()
-    if (process.waitFor() == 0) {
+    if (!process.waitFor(10, TimeUnit.SECONDS)) {
+        val output = process.inputStream.bufferedReader().readLines().joinToString("\n")
+        Notifications.Bus.notify(
+            MbedNotification.GROUP_DISPLAY_ID_INFO.createNotification(
+                "mbed export timed out with output: $output",
+                NotificationType.ERROR
+            ),
+            project
+        )
+        return
+    }
+    if (process.exitValue() == 0) {
         project.putUserData(MbedAppLibDaemon.PROJECT_NEEDS_RELOAD, false)
         CMakeWorkspace.getInstance(project).scheduleReload(true)
     } else {

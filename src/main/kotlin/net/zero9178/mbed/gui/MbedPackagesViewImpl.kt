@@ -12,7 +12,7 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.SpeedSearchComparator
 import com.intellij.ui.TreeSpeedSearch
 import com.intellij.util.ui.tree.TreeUtil
-import net.zero9178.mbed.ModalTask
+import net.zero9178.mbed.MbedAsyncTask
 import net.zero9178.mbed.actions.MbedReloadChangesAction
 import net.zero9178.mbed.packages.*
 import java.nio.file.Paths
@@ -101,7 +101,7 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
             }
             val item = myPackageView.versionsAvailable.selectedItem ?: return@addActionListener
             var result = false
-            ProgressManager.getInstance().run(ModalTask(myProject, "Updating project", {
+            ProgressManager.getInstance().run(MbedAsyncTask(myProject, "Updating project", {
                 result = updatePackage(path.toString(), item.toString(), myProject)
             }) {
                 if (result) {

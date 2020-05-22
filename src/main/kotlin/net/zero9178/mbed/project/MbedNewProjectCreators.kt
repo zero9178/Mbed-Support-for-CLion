@@ -16,7 +16,7 @@ import com.jetbrains.cidr.cpp.cmake.projectWizard.generators.CLionProjectGenerat
 import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace
 import icons.MbedIcons
 import net.zero9178.mbed.MbedNotification
-import net.zero9178.mbed.ModalTask
+import net.zero9178.mbed.MbedSyncTask
 import net.zero9178.mbed.packages.changeTarget
 import net.zero9178.mbed.packages.changeTargetDialog
 import net.zero9178.mbed.state.MbedState
@@ -30,7 +30,7 @@ class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
 
     override fun generateProject(project: Project, virtualFile: VirtualFile, settings: Any, module: Module) {
         ProgressManager.getInstance().run(
-            ModalTask(
+            MbedSyncTask(
                 project,
                 "Creating new Mbed os project",
                 {
