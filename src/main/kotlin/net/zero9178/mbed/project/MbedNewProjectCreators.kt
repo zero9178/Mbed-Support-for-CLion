@@ -73,7 +73,9 @@ class MbedNewProjectCreators : CLionProjectGenerator<Any>() {
                         )
                     )
                 }
-                CMakeWorkspace.getInstance(project).selectProjectDir(project.basePath?.let { File(it) })
+                project.basePath?.let {
+                    CMakeWorkspace.getInstance(project).selectProjectDir(File(it))
+                }
             })
     }
 

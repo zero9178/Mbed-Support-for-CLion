@@ -1,11 +1,11 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '0.4.16'
+    id 'org.jetbrains.intellij' version '0.4.21'
     id 'org.jetbrains.kotlin.jvm' version '1.3.21'
 }
 
 group 'net.zero9178'
-version '2020.1.0'
+version '2020.2.0-Eap'
 
 sourceCompatibility = 1.8
 
@@ -23,7 +23,7 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version 'CL-2020.1'
+    version 'CL-202.5103.16-EAP-SNAPSHOT'
     plugins = ['clion-embedded','git4idea','hg4idea']
 }
 runIde {

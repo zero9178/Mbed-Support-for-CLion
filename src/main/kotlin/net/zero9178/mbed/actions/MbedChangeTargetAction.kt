@@ -30,7 +30,7 @@ class MbedChangeTargetAction : AnAction(), DumbAware {
                 runWriteAction {
                     workspace.unload(false)
                     changeTarget(target, project)
-                    workspace.selectProjectDir(project.basePath?.let { File(it) })
+                    project.basePath?.let { workspace.selectProjectDir(File(it)) }
                 }
             }
         }))
