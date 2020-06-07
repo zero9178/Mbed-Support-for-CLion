@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin require-restart="true">
     <id>net.zero9178.mbed-support</id>
     <name>Mbed Support</name>
     <vendor email="z3r09178@gmail.com" url="https://github.com/zero9178/Mbed-Support-for-CLion"/>
@@ -43,6 +43,11 @@
         <JsonSchema.ProviderFactory implementation="net.zero9178.mbed.editor.MbedAppLibSchemaProviderFactory"/>
     </extensions>
 
+    <projectListeners>
+        <listener class="net.zero9178.mbed.editor.MbedAppFileListener"
+                  topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
+    </projectListeners>
+
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Mbed" factoryClass="net.zero9178.mbed.gui.MbedPackagesViewFactory"
                     icon="MbedIcons.PLUGIN_ICON_13x13" anchor="bottom"/>
@@ -52,10 +57,10 @@
         <checkoutProvider implementation="net.zero9178.mbed.project.MbedImportCheckout"/>
         <projectService serviceInterface="net.zero9178.mbed.gui.MbedPackagesView"
                         serviceImplementation="net.zero9178.mbed.gui.MbedPackagesViewImpl"/>
-        <applicationService serviceImplementation="net.zero9178.mbed.state.MbedState"/>
-        <iconProvider implementation="net.zero9178.mbed.MbedFolderIconProvider"/>
         <projectService serviceImplementation="net.zero9178.mbed.state.MbedProjectState"/>
+        <applicationService serviceImplementation="net.zero9178.mbed.state.MbedState"/>
         <applicationService serviceImplementation="net.zero9178.mbed.project.MbedRememberedInputs"/>
+        <iconProvider implementation="net.zero9178.mbed.MbedFolderIconProvider"/>
         <applicationConfigurable groupId="tools" instance="net.zero9178.mbed.gui.MbedSettingsImpl" displayName="Mbed"/>
     </extensions>
 </idea-plugin>

@@ -15,17 +15,10 @@ class MbedPackagesViewFactory : ToolWindowFactory, DumbAware {
         if (toolWindow !is ToolWindowEx) return
         val project = toolWindow.project
         toolWindow.isAvailable = project.getUserData(MbedAppLibDaemon.PROJECT_IS_MBED_PROJECT) ?: false
-        project.messageBus.connect(project)
+        project.messageBus.connect()
             .subscribe(MbedAppLibDaemon.MBED_PROJECT_CHANGED, object : MbedAppLibDaemon.MbedAppListener {
                 override fun statusChanged(isMbedProject: Boolean) {
                     runInEdt {
-                        // Initialize PackageView so that we can figure out which folders are packages
-                        // and change their icon
-                        if (isMbedProject) {
-                            MbedPackagesView.getInstance(project).refreshTree()
-                        } else {
-                            MbedPackagesView.getInstance(project).clear()
-                        }
                         toolWindow.isAvailable = isMbedProject
                     }
                 }
