@@ -2,11 +2,10 @@ package net.zero9178.mbed.gui
 
 import com.intellij.icons.AllIcons
 import com.intellij.ide.projectView.ProjectView
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.application.invokeAndWaitIfNeeded
-import com.intellij.openapi.application.invokeLater
+import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -15,6 +14,7 @@ import com.intellij.ui.TreeSpeedSearch
 import com.intellij.util.ui.tree.TreeUtil
 import net.zero9178.mbed.MbedAsyncTask
 import net.zero9178.mbed.actions.MbedReloadChangesAction
+import net.zero9178.mbed.editor.MbedAppLibDaemon
 import net.zero9178.mbed.packages.*
 import java.nio.file.Paths
 import java.util.concurrent.CompletableFuture
@@ -27,7 +27,7 @@ import javax.swing.tree.TreeSelectionModel.SINGLE_TREE_SELECTION
 /**
  * GUI for package management
  */
-class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() {
+class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView(), Disposable {
     private val myFlatPackageList = mutableListOf<MbedPackage>()
     private var myReleaseMap = mapOf<String, Pair<String?, List<String>>>()
     private val myIsQuerying = AtomicBoolean(false)
@@ -111,6 +111,16 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
                 }
             })
         }
+        myProject.messageBus.connect(this)
+            .subscribe(MbedAppLibDaemon.MBED_PROJECT_CHANGED, object : MbedAppLibDaemon.MbedAppListener {
+                override fun statusChanged(isMbedProject: Boolean) {
+                    if (isMbedProject) {
+                        refreshTree()
+                    } else {
+                        ProjectView.getInstance(myProject).refresh()
+                    }
+                }
+            })
     }
 
     /**
@@ -121,7 +131,7 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
             return
         }
         val packageFuture = queryPackages(myProject).thenAccept {
-            invokeAndWaitIfNeeded(ModalityState.any()) {
+            runInEdt {
                 when (it) {
                     is QueryPackageError -> myTreeView.tree.emptyText.text = it.message
                     is QueryPackageSuccess -> {
@@ -131,6 +141,7 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
                         myFlatPackageList.clear()
                         val root = DefaultMutableTreeNode("invisible-root")
                         insertPackages(root, listOf(it.topMbedPackage))
+                        ProjectView.getInstance(myProject).refresh()
                         myTreeView.tree.model = DefaultTreeModel(root)
                         TreeUtil.treeNodeTraverser(root).forEach { node ->
                             if (node !is DefaultMutableTreeNode) return@forEach
@@ -147,13 +158,12 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
             }
         }
         val releaseFuture = queryReleases(myProject).thenAccept {
-            invokeLater {
+            runInEdt {
                 myReleaseMap = it
             }
         }
         CompletableFuture.allOf(packageFuture, releaseFuture).handle { _, _ ->
             myIsQuerying.set(false)
-            ProjectView.getInstance(myProject).refresh()
         }
     }
 
@@ -181,4 +191,6 @@ class MbedPackagesViewImpl(private val myProject: Project) : MbedPackagesView() 
         val file = LocalFileSystem.getInstance().findFileByPath(basePath) ?: return
         file.refresh(false, false)
     }
+
+    override fun dispose() {}
 }
