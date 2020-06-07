@@ -1,10 +1,12 @@
 package net.zero9178.mbed.packages
 
-import com.beust.klaxon.JsonArray
+import com.beust.klaxon.Json
 import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Parser
+import com.beust.klaxon.Klaxon
+import com.beust.klaxon.KlaxonException
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace
@@ -17,11 +19,34 @@ import net.zero9178.mbed.state.MbedProjectState
 import net.zero9178.mbed.state.MbedState
 import org.apache.commons.lang.StringUtils
 import java.io.File
-import java.io.FileInputStream
+import java.io.FileReader
 import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+
+private object MbedVersionTargetLogger {
+    val log = Logger.getInstance(Logger::class.java)
+}
+
+data class Target(
+    val inherits: List<String>? = null,
+    val core: String? = null,
+    val public: Boolean? = null,
+    val macros: List<String>? = null,
+    @Json(name = "macros_add") val macrosAdded: List<String>? = null,
+    @Json(name = "macros_remove") val macrosRemoved: List<String>? = null,
+    @Json(name = "extra_labels") val extraLabels: List<String>? = null,
+    @Json(name = "extra_labels_add") val extraLabelsAdd: List<String>? = null,
+    @Json(name = "extra_labels_remove") val extraLabelsRemove: List<String>? = null,
+    val features: List<String>? = null,
+    @Json(name = "features_add") val featuresAdd: List<String>? = null,
+    @Json(name = "features_remove") val featuresRemove: List<String>? = null,
+    @Json(name = "supported_toolchains") val supportedToolchains: List<String>? = null,
+    @Json(name = "device_name") val deviceName: String? = null,
+    @Json(name = "OUTPUT_EXT") val outputExtension: String? = null,
+    @Json(name = "default_lib") val cLibrary: String? = null
+)
 
 /**
  * Queries compatible targets for GCC_ARM
@@ -29,25 +54,53 @@ import java.util.concurrent.TimeUnit
  * @param mbedOsPath path to mbed-os
  */
 fun queryCompatibleTargets(mbedOsPath: String): List<String> {
-    val map = mutableSetOf<String>()
-    val targetJson = Paths.get(mbedOsPath).resolve("targets").resolve("targets.json")
-    val jsonObject = Parser.default().parse(FileInputStream(targetJson.toFile())) as JsonObject
-    for (target in jsonObject) {
-        val targetObject = target.value as? JsonObject
-        targetObject ?: continue
-        val toolchains = targetObject.getOrDefault("supported_toolchains", null) as? JsonArray<*>
-        if (toolchains != null) {
-            if (toolchains.map { it as String }.contains("GCC_ARM")) {
-                map.add(target.key)
-            }
-        } else {
-            val parent = targetObject.getOrDefault("inherits", null) as? JsonArray<*> ?: continue
-            if (parent.map { it as String }.any { map.contains(it) }) {
-                map.add(target.key)
+    val targetJsonPath = Paths.get(mbedOsPath).resolve("targets").resolve("targets.json")
+    val jsonObject = FileReader(targetJsonPath.toFile()).use {
+        Klaxon().parseJsonObject(it)
+    }
+    val targetMap = mutableMapOf<String, Target>()
+    for ((name, obj) in jsonObject) {
+        obj as? JsonObject ?: continue
+        val target = try {
+            Klaxon().parseFromJsonObject<Target>(obj) ?: continue
+        } catch (e: KlaxonException) {
+            MbedVersionTargetLogger.log.error(e)
+            continue
+        }
+        targetMap[name] = target
+    }
+
+    // Returns null if the target does not have a supported toolchains property
+    // True if it contains GCC_ARM and false if it doesn't
+    fun isGCCCompatible(target: Target): Boolean? {
+        if (target.supportedToolchains != null) {
+            return target.supportedToolchains.contains("GCC_ARM")
+        }
+        if (target.inherits.isNullOrEmpty()) {
+            return null
+        }
+        return target.inherits.any {
+            val inherited = targetMap[it] ?: return@any false
+            val result = isGCCCompatible(inherited)
+            // Inheritance works like in Python
+            // isGCCCompatible returns null if the support toolchain property does not exist in the target or
+            // any of it's base targets. If it doesn't return null the property exists. Therefore the value of the
+            // property is also the value of this target's supportedToolchains property and the search is cancelled
+            if (result != null) {
+                return result
+            } else {
+                return@any false
             }
         }
     }
-    return map.toList()
+
+    return targetMap.toList().fold(emptyList()) { result, (name, target) ->
+        if (target.public != false && isGCCCompatible(target) == true) {
+            result + name
+        } else {
+            result
+        }
+    }
 }
 
 /**
