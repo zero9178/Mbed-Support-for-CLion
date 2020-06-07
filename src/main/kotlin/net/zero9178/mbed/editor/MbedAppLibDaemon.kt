@@ -1,5 +1,6 @@
 package net.zero9178.mbed.editor
 
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -21,7 +22,7 @@ import java.nio.file.Paths
  * Per project component which records if any files called mbed_lib.json or mbed_app.json have changed since last
  * cmake regeneration. Sets NEEDS_RELOAD on the project when needed
  */
-class MbedAppLibDaemon : StartupActivity.Background {
+class MbedAppLibDaemon : StartupActivity.Background, Disposable {
 
     companion object {
         val PROJECT_NEEDS_RELOAD = Key<Boolean>("MBED_NEEDS_RELOAD")
@@ -42,7 +43,7 @@ class MbedAppLibDaemon : StartupActivity.Background {
         val exists = Paths.get(basePath).resolve("mbed_app.json").exists()
         project.putUserData(PROJECT_IS_MBED_PROJECT, exists)
         project.messageBus.syncPublisher(MBED_PROJECT_CHANGED).statusChanged(exists)
-        project.messageBus.connect(project).subscribe(VirtualFileManager.VFS_CHANGES, object : BulkFileListener {
+        project.messageBus.connect(this).subscribe(VirtualFileManager.VFS_CHANGES, object : BulkFileListener {
             override fun after(events: MutableList<out VFileEvent>) {
                 if (project.isDisposed) {
                     return
@@ -71,6 +72,8 @@ class MbedAppLibDaemon : StartupActivity.Background {
                 }
                 super.documentChanged(event)
             }
-        }, project)
+        }, this)
     }
+
+    override fun dispose() {}
 }
