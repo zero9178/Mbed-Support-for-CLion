@@ -25,10 +25,10 @@ public abstract class MbedPackagesView {
     }
 
     @NotNull
-    protected PackageView myPackageView = new PackageView();
+    protected final PackageView myPackageView = new PackageView();
 
     @NotNull
-    protected TreeView myTreeView = new TreeView();
+    protected final TreeView myTreeView = new TreeView();
 
     protected static class PackageView {
         public JPanel panel;

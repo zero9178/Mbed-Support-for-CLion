@@ -32,7 +32,7 @@ class MbedAppLibRefreshProvider : EditorNotifications.Provider<EditorNotificatio
         }
         if (project.getUserData(MbedAppLibDaemon.PROJECT_NEEDS_RELOAD) == true) {
             val panel = EditorNotificationPanel()
-            panel.setText("Mbed project needs to be reloaded")
+            panel.text = "Mbed project needs to be reloaded"
             panel.createActionLabel("Reload changes", "Mbed.ReloadChanges")
             return panel
         }
