@@ -8,7 +8,8 @@
     3. [Project Configuration](#project-configuration)
     4. [Changing Target](#changing-target)
     5. [Build Modes](#build-modes)
-    6. [Package Management](#package-management)
+    6. [Compile Profiles](#profiles)
+    7. [Package Management](#package-management)
 3. [Tips for Development](#tips-for-development)
 4. [Known Issues/TODOs](#known-issuestodos)
 
@@ -89,6 +90,35 @@ for size go to `Build -> Switch to Release`. A dialog regenerating the cmake pro
 `Build -> Switch to Debug` to switch back to unoptimized code.
 
 ![alt-text](https://imgur.com/gvlNFsd.png "Switch to Release context menu")
+
+### Compile Profiles
+
+Using profiles it is possible to change flags used for compilation of C, C++ and Assembly code as well as
+linker flags. Mbed defines extra JSON files where one can set flags per supported toolchain. For further information
+see: https://os.mbed.com/docs/mbed-os/v5.15/tools/build-profiles.html 
+
+The plugin provides a GUI for adding profiles that should be used during the build process. Simply open the settings 
+and go to `Build, Execution, Deployement -> Mbed Profiles`:
+
+![alt-text](https://i.imgur.com/U6W8lcg.png "Settings menu for adding compilation profiles")
+
+When pressing the `+` button a file dialog will appear allowing you to select a new profile to add. Using `-` removes
+the selected profile. With the Edit button one can change the path of a profile. 
+
+![alt-text](https://i.imgur.com/hNl4Yyq.png "Adding a new profile")
+
+It is possible to add multiple profiles. Profiles added last  also add their builds flags last and can therefore
+overwrite options of previous profiles. Using the arrow buttons it is possible to change the order of the profiles.
+
+When you are done simply click `Apply` and the IDE will regenerate the project with the new build flags.
+
+As soon as a JSON file is added as a profile, code completion and type checking and similar will be available in it.
+
+![alt-text](https://i.imgur.com/8GQe1pd.png "Code completion and documentation inside of a profile")
+
+When a profile in use changes, a suggestion to reload the project to apply the new flags appears.
+
+![alt-text](https://i.imgur.com/VwqEcwn.png "Reload notification after a profile has been edited")
 
 ### Package Management
 
