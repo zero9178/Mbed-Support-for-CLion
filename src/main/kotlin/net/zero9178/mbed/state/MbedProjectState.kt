@@ -14,6 +14,7 @@ class MbedProjectState : PersistentStateComponent<MbedProjectState>, Disposable 
     override fun loadState(state: MbedProjectState) = XmlSerializerUtil.copyBean(state, this)
 
     var isRelease: Boolean = false
+    var additionalProfiles = emptyList<String>()
 
     companion object {
         fun getInstance(project: Project) = project.service<MbedProjectState>()

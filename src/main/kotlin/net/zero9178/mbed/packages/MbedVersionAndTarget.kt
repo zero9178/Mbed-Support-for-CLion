@@ -174,7 +174,10 @@ fun exportToCmake(project: Project) {
             "-i",
             "cmake_gcc_arm",
             "--profile",
-            if (MbedProjectState.getInstance(project).isRelease) "release" else "debug"
+            if (MbedProjectState.getInstance(project).isRelease) "release" else "debug",
+            *MbedProjectState.getInstance(project).additionalProfiles.fold(emptyArray<String>()) { result, curr ->
+                (result + "--profile") + curr
+            }
         ).start()
     if (!process.waitFor(10, TimeUnit.SECONDS)) {
         val output = process.inputStream.bufferedReader().readLines().joinToString("\n")
