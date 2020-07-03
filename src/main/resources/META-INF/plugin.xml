@@ -62,5 +62,7 @@
         <applicationService serviceImplementation="net.zero9178.mbed.project.MbedRememberedInputs"/>
         <iconProvider implementation="net.zero9178.mbed.MbedFolderIconProvider"/>
         <applicationConfigurable groupId="tools" instance="net.zero9178.mbed.gui.MbedSettingsImpl" displayName="Mbed"/>
+        <projectConfigurable groupId="build" instance="net.zero9178.mbed.gui.MbedProfileSettingsImpl"
+                             displayName="Mbed Profiles"/>
     </extensions>
 </idea-plugin>
