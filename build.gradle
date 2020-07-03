@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'net.zero9178'
-version '2020.1.1'
+version '2020.1.2'
 
 sourceCompatibility = 1.8
 
@@ -37,9 +37,8 @@ compileTestKotlin {
 }
 patchPluginXml {
     changeNotes """
-      2020.1.1: <br/>
-      Fixed Target discovery. Targets that are not public are not listed anymore and inheritance rules for targets are now correctly implemented<br/>
-      Moved invocations of the mbed cli to background threads and used a non modal dialog<br/>
-      Fixed bug with mbed project being unloaded due to an mbed_app.json being deleted even if it's not in the root directory<br/>
-      Disable dynamic plugin reloading for now"""
+      2020.1.2: <br/>
+      Added the ability to specify Mbed profiles to be used during compilation<br/>
+      JSONs that have been added as profiles have code completion and schema validation<br/>
+      For details see 'Compile Profiles' in the README.md"""
 }
