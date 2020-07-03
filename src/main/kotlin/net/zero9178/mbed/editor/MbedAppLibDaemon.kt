@@ -50,7 +50,12 @@ class MbedAppLibDaemon : StartupActivity.Background {
             override fun documentChanged(event: DocumentEvent) {
                 val vfs =
                     FileDocumentManager.getInstance().getFile(event.document) ?: return super.documentChanged(event)
-                if (vfs.name.toLowerCase() == "mbed_lib.json" || vfs.name.toLowerCase() == "mbed_app.json") {
+                if (vfs.name.toLowerCase() == "mbed_lib.json" || vfs.name.toLowerCase() == "mbed_app.json" || MbedProjectState.getInstance(
+                        project
+                    ).additionalProfiles.any {
+                        it == vfs.path
+                    }
+                ) {
                     project.putUserData(PROJECT_NEEDS_RELOAD, true)
                     EditorNotifications.getInstance(project).updateNotifications(vfs)
                 }

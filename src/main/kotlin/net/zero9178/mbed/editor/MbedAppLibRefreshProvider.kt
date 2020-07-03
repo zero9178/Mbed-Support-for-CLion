@@ -7,6 +7,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotifications
+import net.zero9178.mbed.state.MbedProjectState
 
 /**
  * Provides the ribbon up top in the editor when editing and changing mbed_app.json or mbed_lib.json
@@ -27,7 +28,12 @@ class MbedAppLibRefreshProvider : EditorNotifications.Provider<EditorNotificatio
         if (project.isDisposed) {
             return null
         }
-        if (file.name.toLowerCase() != "mbed_app.json" && file.name.toLowerCase() != "mbed_lib.json") {
+        if (file.name.toLowerCase() != "mbed_app.json" && file.name.toLowerCase() != "mbed_lib.json" && MbedProjectState.getInstance(
+                project
+            ).additionalProfiles.none {
+                it == file.path
+            }
+        ) {
             return null
         }
         if (project.getUserData(MbedAppLibDaemon.PROJECT_NEEDS_RELOAD) == true) {
