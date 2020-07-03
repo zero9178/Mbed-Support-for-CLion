@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "title": "Mbed Profile Schema",
+  "description": "Configuration file for an mbed application",
+  "type": "object",
+  "compiler_definitions": {
+    "type": "object",
+    "properties": {
+      "common": {
+        "type": "array",
+        "description": "Flags for both C and C++ Compilers",
+        "items": {
+          "type": "string"
+        }
+      },
+      "c": {
+        "type": "array",
+        "description": "Flags for the C Compiler",
+        "items": {
+          "type": "string"
+        }
+      },
+      "asm": {
+        "type": "array",
+        "description": "Flags for the Assembler",
+        "items": {
+          "type": "string"
+        }
+      },
+      "cxx": {
+        "type": "array",
+        "description": "Flags for the C++ Compiler",
+        "items": {
+          "type": "string"
+        }
+      },
+      "ld": {
+        "type": "array",
+        "description": "Flags for the Linker",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "properties": {
+    "GCC_ARM": {
+      "$ref": "#/compiler_definitions",
+      "description": "Flags for the GCC Compiler"
+    },
+    "IAR": {
+      "$ref": "#/compiler_definitions",
+      "description": "Flags for the IAR Compiler"
+    },
+    "ARM": {
+      "$ref": "#/compiler_definitions",
+      "description": "Flags for the ARM Compiler"
+    }
+  },
+  "additionalProperties": false
+}
