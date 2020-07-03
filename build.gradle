@@ -23,7 +23,7 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version 'CL-202.5103.16-EAP-SNAPSHOT'
+    version 'CL-202.6109-EAP-CANDIDATE-SNAPSHOT'
     plugins = ['clion-embedded','git4idea','hg4idea']
 }
 runIde {
