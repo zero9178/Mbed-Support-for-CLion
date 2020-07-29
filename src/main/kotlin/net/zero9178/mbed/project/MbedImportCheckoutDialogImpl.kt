@@ -175,7 +175,7 @@ class MbedImportCheckoutDialogImpl(private val project: Project) : VcsCloneCompo
         // temporary empty project for the checkout process
         if (newProject != null) {
             changeTargetDialog(newProject)?.let { changeTarget(it, newProject) }
-            CMakeWorkspace.getInstance(newProject).selectProjectDir(newProject.basePath?.let { File(it) })
+            newProject.basePath?.let { CMakeWorkspace.getInstance(newProject).selectProjectDir(File(it)) }
         }
     }
 }
