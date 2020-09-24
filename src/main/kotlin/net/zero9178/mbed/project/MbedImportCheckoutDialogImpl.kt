@@ -62,14 +62,14 @@ class MbedImportCheckoutDialogImpl(private val project: Project) : VcsCloneCompo
         fcd.isShowFileSystemRoots = true
         fcd.isHideIgnored = false
         directoryField.addBrowseFolderListener(
-            DvcsBundle.getString("clone.destination.directory.browser.title"),
-            DvcsBundle.getString("clone.destination.directory.browser.description"),
+            DvcsBundle.message("clone.destination.directory.browser.title"),
+            DvcsBundle.message("clone.destination.directory.browser.description"),
             project,
             fcd
         )
         mainPanel = panel {
-            row(VcsBundle.getString("vcs.common.labels.url")) { urlEditor(growX) }
-            row(VcsBundle.getString("vcs.common.labels.directory")) { directoryField(growX) }
+            row(VcsBundle.message("vcs.common.labels.url")) { urlEditor(growX) }
+            row(VcsBundle.message("vcs.common.labels.directory")) { directoryField(growX) }
                 .largeGapAfter()
             row {
                 errorComponent = BorderLayoutPanel(UIUtil.DEFAULT_HGAP, 0)
