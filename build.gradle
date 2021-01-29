@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'net.zero9178'
-version '2020.3.0-Eap'
+version '2021.1.1-Eap'
 
 sourceCompatibility = 1.8
 
@@ -23,8 +23,9 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version 'CL-203-EAP-SNAPSHOT'
-    plugins = ['clion-embedded','git4idea','hg4idea']
+    version 'LATEST-EAP-SNAPSHOT'
+    plugins = ['clion-embedded','git4idea','hg4idea','com.intellij.clion']
+    type 'CL'
 }
 runIde {
     jvmArgs '-Xmx2G'
